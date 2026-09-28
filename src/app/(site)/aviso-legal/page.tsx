@@ -10,10 +10,12 @@ export const metadata = pageMetadata({
 
 export default function LegalNoticePage() {
   return (
-    <ProsePage eyebrow="Legal" title="Aviso legal" updated="27 de septiembre de 2026">
+    <ProsePage eyebrow="Legal" title="Aviso legal" updated="28 de septiembre de 2026">
       <p>
-        Este sitio es operado por {site.legalName}, con atención en {site.contact.location}. Este
-        texto es un modelo y debe ser revisado por el Estudio antes de su publicación.
+        Este sitio es operado por {site.legalName} (Dra. Paula Florencia Sardo, CPACF T° 152 F° 256
+        · CAAL T° V F° 69), con atención en {site.contact.location}. Contacto:{" "}
+        <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a> · WhatsApp{" "}
+        {site.contact.phone}.
       </p>
 
       <h2>Alcance de la información</h2>
@@ -27,7 +29,8 @@ export default function LegalNoticePage() {
       <h2>Relación profesional</h2>
       <p>
         La relación profesional con el Estudio comienza únicamente a partir de la aceptación expresa
-        del caso y la conformidad sobre honorarios.
+        del caso y la conformidad sobre honorarios. El envío de un formulario, la reserva de un
+        turno o el uso del asistente no crean por sí solos esa relación.
       </p>
 
       <h2>Propiedad intelectual</h2>
@@ -39,7 +42,14 @@ export default function LegalNoticePage() {
       <h2>Enlaces externos</h2>
       <p>
         El Estudio no se responsabiliza por el contenido de sitios de terceros enlazados desde este
-        sitio.
+        sitio (incluido WhatsApp u otras plataformas).
+      </p>
+
+      <h2>Jurisdicción</h2>
+      <p>
+        Para cualquier controversia relativa al uso de este sitio resultan aplicables las leyes de
+        la República Argentina, con jurisdicción en los tribunales competentes de la Ciudad Autónoma
+        de Buenos Aires, sin perjuicio de los fueros especiales que pudieran corresponder.
       </p>
     </ProsePage>
   );

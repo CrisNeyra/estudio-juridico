@@ -162,7 +162,10 @@ Detalle en [ADR 0005](docs/adr/0005-seguridad.md).
 
 ## Llevarlo a producción
 
-Orden recomendado. Las guías paso a paso están en los runbooks.
+Guía por fases (PASO / Ubicación / Acción / Verificación):
+[docs/runbooks/produccion-fases.md](docs/runbooks/produccion-fases.md).
+
+Orden resumido:
 
 1. **Dominio y Vercel.** Importar este repositorio y definir `NEXT_PUBLIC_SITE_URL` con el dominio final (con `https`). Guía: [docs/runbooks/deploy.md](docs/runbooks/deploy.md).
 2. **Email (Resend).** Verificar el dominio del remitente y cargar `RESEND_API_KEY`, `CONTACT_TO_EMAIL` y `CONTACT_FROM_EMAIL`. Sin esto, en producción el formulario no envía la consulta.
