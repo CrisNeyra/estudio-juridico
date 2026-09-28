@@ -12,7 +12,7 @@ test.describe("asistente IA (modo mock)", () => {
     await dialog.getByPlaceholder("Escribí tu consulta…").fill("Me despidieron sin causa ayer");
     await dialog.getByRole("button", { name: "Enviar" }).click();
 
-    await expect(dialog.getByText(/corresponde al área de Laboral/)).toBeVisible();
+    await expect(dialog.getByText(/corresponde al área de Derecho Laboral/)).toBeVisible();
     await expect(dialog.getByRole("link", { name: "pedir turno", exact: true })).toHaveAttribute(
       "href",
       "/turnos",

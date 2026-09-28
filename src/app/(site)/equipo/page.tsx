@@ -1,6 +1,7 @@
 import { Reveal } from "@/components/motion/reveal";
 import { CtaBand } from "@/components/sections/cta-band";
 import { PageHeader } from "@/components/sections/page-header";
+import { PageShell } from "@/components/sections/page-shell";
 import { team } from "@/content/site";
 import { pageMetadata } from "@/lib/seo";
 
@@ -20,7 +21,7 @@ function initials(name: string) {
 
 export default function TeamPage() {
   return (
-    <>
+    <PageShell photo="equipo">
       <PageHeader
         eyebrow="Equipo"
         title={
@@ -30,11 +31,11 @@ export default function TeamPage() {
             <em>detrás de cada caso.</em>
           </>
         }
-        lead="Un equipo especializado por área, con un abogado responsable y accesible para cada cliente."
+        lead="Dra. Paula Florencia Sardo y asociadxs. Atención personalizada en CABA y en la Provincia de Buenos Aires."
       />
 
       <section aria-label="Integrantes" className="container-page">
-        <ul className="grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:max-w-xl">
           {team.map((member, i) => (
             <Reveal as="li" key={member.name} delay={i * 0.08}>
               <div
@@ -60,6 +61,6 @@ export default function TeamPage() {
       </section>
 
       <CtaBand />
-    </>
+    </PageShell>
   );
 }

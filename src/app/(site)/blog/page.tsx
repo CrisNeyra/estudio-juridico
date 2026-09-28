@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Reveal } from "@/components/motion/reveal";
 import { PageHeader } from "@/components/sections/page-header";
+import { PageShell } from "@/components/sections/page-shell";
 import { getService } from "@/content/services";
 import { formatDate, getAllPosts } from "@/lib/blog";
 import { pageMetadata } from "@/lib/seo";
@@ -17,7 +18,7 @@ export default async function BlogPage() {
   const posts = await getAllPosts();
 
   return (
-    <>
+    <PageShell photo="blog">
       <PageHeader
         eyebrow="Novedades"
         title={
@@ -64,6 +65,6 @@ export default async function BlogPage() {
           </ul>
         )}
       </section>
-    </>
+    </PageShell>
   );
 }

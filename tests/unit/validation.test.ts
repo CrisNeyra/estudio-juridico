@@ -61,7 +61,7 @@ describe("appointmentSchema", () => {
     name: "Juan Gómez",
     email: "juan@example.com",
     phone: "1155550000",
-    area: "familia-y-sucesiones",
+    area: "familia",
     date: "2026-10-05",
     time: "10:00",
     mode: "presencial",

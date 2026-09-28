@@ -1,7 +1,9 @@
 # ADR 0004 — Sistema de diseño editorial y minimalista
 
-- Estado: aceptado
+- Estado: reemplazado en la paleta (2026-09-27, misma fecha)
 - Fecha: 2026-09-27
+
+La versión publicada usa fondo blanco, azul como color principal y violeta como acento, sin modo oscuro. El resto de este registro describe la primera dirección visual (marfil, bordó y modo oscuro).
 
 ## Contexto
 

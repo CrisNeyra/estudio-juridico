@@ -14,30 +14,44 @@ export default function HomePage() {
     <>
       <JsonLd data={legalServiceJsonLd()} />
 
-      <section className="container-page pt-14 pb-24 md:pt-24 md:pb-36">
-        <div className="rise">
-          <p className="eyebrow">
-            {site.tagline} — Buenos Aires, desde {site.foundedYear}
-          </p>
-          <h1 className="mt-8 display text-[clamp(3.25rem,10vw,9.5rem)]">
-            Derecho claro
-            <br />
-            para decisiones <em className="text-brand">importantes.</em>
-          </h1>
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          <video
+            className="hero-video size-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/videos/hero-poster.jpg"
+          >
+            <source src="/videos/hero.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-white/80" />
         </div>
-
-        <div className="mt-14 grid gap-14 md:mt-20 md:grid-cols-12 md:gap-8">
-          <div className="rise [animation-delay:100ms] md:col-span-7">
-            <ServiceFinder />
+        <div className="container-page pt-14 pb-24 md:pt-24 md:pb-36">
+          <div className="rise">
+            <p className="eyebrow">{site.tagline} — CABA y Provincia de Buenos Aires</p>
+            <h1 className="mt-8 display text-[clamp(2.35rem,7.2vw,6.25rem)]">
+              Tu tranquilidad,
+              <br />
+              respaldada por la <em className="text-violet">mejor defensa legal.</em>
+            </h1>
           </div>
-          <div className="rise [animation-delay:200ms] md:col-span-4 md:col-start-9">
-            <p className="text-lg text-muted-foreground">
-              Somos un estudio jurídico integral. Te acompañamos en diez áreas del derecho con un
-              mismo criterio: explicarte todo con claridad y buscar la solución más conveniente.
-            </p>
-            <Link href="/estudio" className="mt-6 inline-block link-underline">
-              Conocé el estudio
-            </Link>
+
+          <div className="mt-14 grid gap-14 md:mt-20 md:grid-cols-12 md:gap-8">
+            <div className="rise [animation-delay:100ms] md:col-span-7">
+              <ServiceFinder />
+            </div>
+            <div className="rise [animation-delay:200ms] md:col-span-4 md:col-start-9">
+              <p className="text-lg text-muted-foreground">
+                Asesoramiento jurídico integral, acompañamiento profesional y defensa de tus
+                derechos. Atención personalizada en la Ciudad Autónoma de Buenos Aires y en la
+                Provincia de Buenos Aires.
+              </p>
+              <Link href="/estudio" className="mt-6 inline-block link-underline">
+                Conocé el estudio
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -61,7 +75,7 @@ export default function HomePage() {
       </section>
 
       <section aria-label="El estudio en números" className="container-page mt-32">
-        <dl className="grid grid-cols-2 gap-y-12 md:grid-cols-4">
+        <dl className="grid grid-cols-1 gap-y-12 sm:grid-cols-3">
           {stats.map((s, i) => (
             <Reveal
               key={s.label}

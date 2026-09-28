@@ -12,9 +12,8 @@ export default function LegalNoticePage() {
   return (
     <ProsePage eyebrow="Legal" title="Aviso legal" updated="27 de septiembre de 2026">
       <p>
-        Este sitio es operado por {site.legalName}, con domicilio en {site.contact.address.street},{" "}
-        {site.contact.address.city}. Este texto es un modelo y debe ser revisado por el Estudio
-        antes de su publicación.
+        Este sitio es operado por {site.legalName}, con atención en {site.contact.location}. Este
+        texto es un modelo y debe ser revisado por el Estudio antes de su publicación.
       </p>
 
       <h2>Alcance de la información</h2>

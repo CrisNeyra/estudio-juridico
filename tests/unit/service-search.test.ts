@@ -15,13 +15,10 @@ describe("searchServices", () => {
     ["me despidieron del trabajo", "laboral"],
     ["me despidieron sin causa ayer", "laboral"],
     ["causa penal por estafa", "penal"],
-    ["choqué con el auto", "danos-y-perjuicios"],
-    ["me intimó ARCA", "tributario"],
-    ["quiero divorciarme", "familia-y-sucesiones"],
-    ["me cancelaron el vuelo", "defensa-del-consumidor"],
-    ["tuve un accidente de tránsito", "danos-y-perjuicios"],
-    ["cómo me jubilo", "previsional"],
-    ["problema con el alquiler del departamento", "inmobiliario"],
+    ["choqué con el auto", "civil-y-danos"],
+    ["quiero divorciarme", "familia"],
+    ["tuve un accidente de tránsito", "civil-y-danos"],
+    ["declaratoria de herederos", "sucesiones"],
     ["me hicieron una denuncia", "penal"],
   ])("'%s' sugiere %s", (query, slug) => {
     expect(top(query)).toBe(slug);
@@ -38,9 +35,9 @@ describe("searchServices", () => {
 });
 
 describe("services content", () => {
-  it("tiene 10 áreas con slugs únicos y contenido completo", () => {
-    expect(services).toHaveLength(10);
-    expect(new Set(services.map((s) => s.slug)).size).toBe(10);
+  it("tiene 5 áreas con slugs únicos y contenido completo", () => {
+    expect(services).toHaveLength(5);
+    expect(new Set(services.map((s) => s.slug)).size).toBe(5);
     for (const s of services) {
       expect(s.slug).toMatch(/^[a-z0-9-]+$/);
       expect(s.keywords.length).toBeGreaterThan(3);

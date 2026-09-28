@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { CtaBand } from "@/components/sections/cta-band";
+import { PageShell } from "@/components/sections/page-shell";
 import { ServiceIcon } from "@/components/service-icon";
 import { AskAssistantButton } from "@/components/ai/ask-assistant-button";
 import {
@@ -42,7 +43,7 @@ export default async function ServicePage(props: PageProps<"/servicios/[slug]">)
   const next = services[(index + 1) % services.length]!;
 
   return (
-    <>
+    <PageShell photo={service.slug}>
       <JsonLd
         data={[
           serviceJsonLd(service),
@@ -177,6 +178,6 @@ export default async function ServicePage(props: PageProps<"/servicios/[slug]">)
           />
         </Link>
       </nav>
-    </>
+    </PageShell>
   );
 }

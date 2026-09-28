@@ -1,5 +1,6 @@
 import { CtaBand } from "@/components/sections/cta-band";
 import { PageHeader } from "@/components/sections/page-header";
+import { PageShell } from "@/components/sections/page-shell";
 import { ServiceFinder } from "@/components/sections/service-finder";
 import { ServicesIndex } from "@/components/sections/services-index";
 import { pageMetadata } from "@/lib/seo";
@@ -7,20 +8,20 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Servicios y áreas de práctica",
   description:
-    "Diez áreas de práctica: civil, familia y sucesiones, laboral, penal, comercial, inmobiliario, previsional, daños, consumidor y tributario.",
+    "Cinco áreas de práctica: laboral, familia, penal, civil y daños, y sucesiones. Atención en CABA y Provincia de Buenos Aires.",
   path: "/servicios",
 });
 
 export default function ServicesPage() {
   return (
-    <>
+    <PageShell photo="servicios">
       <PageHeader
-        eyebrow="Servicios"
+        eyebrow="Áreas"
         title={
           <>
-            Diez áreas.
+            Cinco áreas.
             <br />
-            <em>Un mismo criterio.</em>
+            <em className="text-violet">Un mismo criterio.</em>
           </>
         }
         lead="Elegí el área o contanos tu situación con tus palabras: te indicamos por dónde empezar."
@@ -35,6 +36,6 @@ export default function ServicesPage() {
       </section>
 
       <CtaBand />
-    </>
+    </PageShell>
   );
 }

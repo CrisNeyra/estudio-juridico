@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { navigation, site } from "@/content/site";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import {
   Sheet,
   SheetContent,
@@ -27,7 +26,8 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <header
@@ -48,8 +48,8 @@ export function SiteHeader() {
           <span className="hidden eyebrow sm:inline">{site.tagline}</span>
         </Link>
 
-        <nav aria-label="Principal" className="hidden md:block">
-          <ul className="flex items-center gap-8">
+        <nav aria-label="Principal" className="hidden lg:block">
+          <ul className="flex items-center gap-5 xl:gap-7">
             {navigation.map((item) => (
               <li key={item.href}>
                 <Link
@@ -71,7 +71,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <ThemeToggle />
           <Link
             href="/portal"
             className="hidden px-3 text-sm text-muted-foreground transition-colors hover:text-foreground lg:inline"
@@ -87,7 +86,7 @@ export function SiteHeader() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
-              className="inline-flex size-10 items-center justify-center md:hidden"
+              className="inline-flex size-11 items-center justify-center lg:hidden"
               aria-label="Abrir menú"
             >
               <Menu className="size-5" strokeWidth={1.5} aria-hidden="true" />

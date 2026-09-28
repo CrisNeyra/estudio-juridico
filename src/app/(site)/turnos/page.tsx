@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { BookingForm } from "@/components/forms/booking-form";
 import { PageHeader } from "@/components/sections/page-header";
+import { PageShell } from "@/components/sections/page-shell";
 import { getService } from "@/content/services";
 import { site } from "@/content/site";
 import { bookingRange } from "@/lib/schedule";
@@ -19,7 +20,7 @@ export default async function BookingPage(props: PageProps<"/turnos">) {
   const { min, max } = bookingRange(new Date());
 
   return (
-    <>
+    <PageShell photo="turnos">
       <PageHeader
         eyebrow="Turnos"
         title={
@@ -44,12 +45,8 @@ export default async function BookingPage(props: PageProps<"/turnos">) {
             <p className="mt-2 text-lg text-foreground">60 minutos</p>
           </div>
           <div>
-            <p className="eyebrow">Dirección</p>
-            <p className="mt-2 text-lg text-foreground">
-              {site.contact.address.street}
-              <br />
-              {site.contact.address.city}
-            </p>
+            <p className="eyebrow">Atención</p>
+            <p className="mt-2 text-lg text-foreground">{site.contact.location}</p>
           </div>
           <p className="border-t border-border pt-6 text-sm">
             Traé o tené a mano la documentación relacionada con tu consulta. Si necesitás cancelar,
@@ -57,6 +54,6 @@ export default async function BookingPage(props: PageProps<"/turnos">) {
           </p>
         </aside>
       </section>
-    </>
+    </PageShell>
   );
 }

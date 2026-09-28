@@ -5,7 +5,7 @@ import { site } from "@/content/site";
 
 export function CtaBand({
   title = "¿Tenés una consulta?",
-  text = "Contanos tu situación. Te respondemos en menos de 24 horas hábiles con una primera orientación.",
+  text = "Contanos tu situación. Te orientamos sobre el área que corresponde y cómo seguir.",
 }: {
   title?: string;
   text?: string;

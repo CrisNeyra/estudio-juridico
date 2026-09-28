@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { site } from "@/content/site";
 import { getAuthContext, isStaff } from "@/lib/auth";
 import { signOut } from "@/app/(portal)/portal/actions";
@@ -58,7 +57,6 @@ export default async function PortalLayout({ children }: { children: React.React
                 </form>
               </>
             ) : null}
-            <ThemeToggle />
           </nav>
         </div>
       </header>

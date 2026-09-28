@@ -1,6 +1,7 @@
 import { Reveal } from "@/components/motion/reveal";
 import { CtaBand } from "@/components/sections/cta-band";
 import { PageHeader } from "@/components/sections/page-header";
+import { PageShell } from "@/components/sections/page-shell";
 import { site, stats, values } from "@/content/site";
 import { pageMetadata } from "@/lib/seo";
 
@@ -12,7 +13,7 @@ export const metadata = pageMetadata({
 
 export default function StudioPage() {
   return (
-    <>
+    <PageShell photo="estudio">
       <PageHeader
         eyebrow="El estudio"
         title={
@@ -22,30 +23,29 @@ export default function StudioPage() {
             <em>rigurosa y sin vueltas.</em>
           </>
         }
-        lead={`Desde ${site.foundedYear} acompañamos a personas, familias y empresas en momentos en los que una buena decisión legal hace la diferencia.`}
+        lead="Asesoramiento jurídico integral, acompañamiento profesional y defensa de tus derechos, con atención personalizada en CABA y en la Provincia de Buenos Aires."
       />
 
       <section className="container-page grid gap-12 md:grid-cols-12">
         <Reveal className="space-y-6 text-lg md:col-span-6 md:col-start-4">
           <p>
-            Nacimos con una idea simple: el derecho no tiene por qué ser incomprensible. Cada
-            cliente merece entender su situación, sus opciones y los costos reales antes de tomar
-            una decisión.
+            El estudio de la Dra. Paula Florencia Sardo acompaña a personas que necesitan entender
+            su situación y defender sus derechos, con un trato cercano y profesional.
           </p>
           <p className="text-muted-foreground">
-            Trabajamos en equipos por área, lo que nos permite combinar especialización con una
-            mirada integral: un divorcio puede involucrar una sociedad, un despido puede derivar en
-            un reclamo previsional. Por eso los casos se analizan en conjunto.
+            La práctica abarca derecho laboral, familia, penal, civil y daños, y sucesiones. La
+            atención es personalizada, en la Ciudad Autónoma de Buenos Aires y en la Provincia de
+            Buenos Aires.
           </p>
           <p className="text-muted-foreground">
-            Priorizamos la negociación y la mediación cuando conviene, y litigamos con firmeza
-            cuando es necesario.
+            Priorizamos explicarte las opciones con claridad y avanzar por el camino que mejor
+            resguarde tus derechos.
           </p>
         </Reveal>
       </section>
 
       <section aria-label="Trayectoria" className="container-page mt-28">
-        <dl className="grid grid-cols-2 border-t border-border md:grid-cols-4">
+        <dl className="grid grid-cols-1 border-t border-border sm:grid-cols-3">
           {stats.map((s) => (
             <div key={s.label} className="flex flex-col border-b border-border py-8 md:border-b-0">
               <dt className="text-sm text-muted-foreground">{s.label}</dt>
@@ -70,6 +70,6 @@ export default function StudioPage() {
       </section>
 
       <CtaBand />
-    </>
+    </PageShell>
   );
 }

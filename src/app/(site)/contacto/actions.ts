@@ -76,6 +76,6 @@ export async function submitContact(_prev: FormState, formData: FormData): Promi
   return {
     status: "success",
     message:
-      "¡Gracias! Recibimos tu consulta y te respondemos dentro de las próximas 24 horas hábiles.",
+      "¡Gracias! Recibimos tu consulta. Te vamos a escribir para orientarte sobre los próximos pasos.",
   };
 }

@@ -50,11 +50,7 @@ export function SiteFooter() {
 
         <address className="text-sm not-italic md:col-span-2">
           <p className="mb-4 eyebrow">Contacto</p>
-          <p className="text-muted-foreground">
-            {contact.address.street}
-            <br />
-            {contact.address.city}
-          </p>
+          <p className="text-muted-foreground">{contact.location}</p>
           <p className="mt-3">
             <a href={contact.phoneHref} className="link-underline">
               {contact.phone}
@@ -65,7 +61,6 @@ export function SiteFooter() {
               {contact.email}
             </a>
           </p>
-          <p className="mt-3 text-muted-foreground">{contact.hours}</p>
         </address>
       </div>
 
@@ -85,26 +80,6 @@ export function SiteFooter() {
               <Link href="/aviso-legal" className="hover:text-foreground">
                 Aviso legal
               </Link>
-            </li>
-            <li>
-              <a
-                href={site.social.linkedin}
-                className="hover:text-foreground"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                LinkedIn
-              </a>
-            </li>
-            <li>
-              <a
-                href={site.social.instagram}
-                className="hover:text-foreground"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Instagram
-              </a>
             </li>
           </ul>
         </div>

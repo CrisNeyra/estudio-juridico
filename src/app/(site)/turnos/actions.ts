@@ -143,7 +143,7 @@ export async function bookAppointment(
   const modeLabel = data.mode === "presencial" ? "Presencial" : "Videollamada";
   const location =
     data.mode === "presencial"
-      ? `${site.contact.address.street}, ${site.contact.address.city}`
+      ? site.contact.location
       : "Videollamada (te enviamos el enlace por email)";
 
   const ics = buildIcs({

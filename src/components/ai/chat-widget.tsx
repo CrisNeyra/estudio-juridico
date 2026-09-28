@@ -105,7 +105,7 @@ export function ChatWidget() {
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={open ? "Cerrar asistente virtual" : "Abrir asistente virtual"}
-        className="fixed right-5 bottom-5 z-40 inline-flex items-center gap-2 rounded-full bg-foreground py-3.5 pr-5 pl-4 text-sm text-background shadow-lg transition-colors hover:bg-brand hover:text-brand-foreground md:right-8 md:bottom-8"
+        className="fixed right-5 bottom-20 z-40 inline-flex min-h-12 items-center gap-2 rounded-full bg-foreground py-3 pr-5 pl-4 text-sm text-background shadow-lg transition-colors hover:bg-brand hover:text-brand-foreground md:right-8 md:bottom-24"
       >
         {open ? (
           <X className="size-5" aria-hidden="true" />
@@ -126,7 +126,7 @@ export function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-3 bottom-24 z-40 flex max-h-[min(70vh,640px)] flex-col overflow-hidden rounded-lg border border-border bg-background shadow-2xl sm:inset-x-auto sm:right-8 sm:w-[420px] md:bottom-28"
+            className="fixed inset-x-3 bottom-36 z-40 flex max-h-[min(62vh,640px)] flex-col overflow-hidden rounded-lg border border-border bg-background shadow-2xl sm:inset-x-auto sm:right-8 sm:w-[420px] md:bottom-40"
           >
             <header className="flex items-start justify-between gap-4 border-b border-border p-5">
               <div>

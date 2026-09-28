@@ -4,7 +4,7 @@ test.describe("sitio institucional", () => {
   test("la home prioriza los servicios y el buscador sugiere un área", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page).toHaveTitle(/Arce & Valdés/);
+    await expect(page).toHaveTitle(/Paula Sardo/);
 
     await page
       .getByRole("searchbox", { name: "Contanos qué necesitás resolver" })
@@ -13,17 +13,17 @@ test.describe("sitio institucional", () => {
     await expect(suggestion).toBeVisible();
     await suggestion.click();
     await expect(page).toHaveURL(/\/servicios\/laboral$/);
-    await expect(page.getByRole("heading", { level: 1, name: "Laboral" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Derecho Laboral" })).toBeVisible();
   });
 
-  test("las 10 áreas tienen página propia con FAQ", async ({ page }) => {
+  test("las 5 áreas tienen página propia con FAQ", async ({ page }) => {
     await page.goto("/servicios");
     const links = page
       .getByRole("region", { name: "Listado de áreas" })
       .locator('a[href^="/servicios/"]');
-    await expect(links).toHaveCount(10);
+    await expect(links).toHaveCount(5);
 
-    await page.goto("/servicios/defensa-del-consumidor");
+    await page.goto("/servicios/familia");
     await expect(page.getByRole("navigation", { name: "Migas de pan" })).toBeVisible();
     const faq = page.getByRole("main").getByRole("button", { expanded: false }).first();
     await faq.click();

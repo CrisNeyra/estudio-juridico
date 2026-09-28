@@ -2,17 +2,7 @@
  * Fuente única de verdad de las áreas de práctica. Todo lo demás (páginas, sitemap,
  * buscador, asistente de IA, JSON-LD) se deriva de este archivo.
  */
-export type ServiceIcon =
-  | "scroll"
-  | "users"
-  | "briefcase"
-  | "gavel"
-  | "building"
-  | "house"
-  | "landmark"
-  | "shield"
-  | "shopping"
-  | "receipt";
+export type ServiceIcon = "scroll" | "users" | "briefcase" | "gavel" | "shield";
 
 export type Faq = { question: string; answer: string };
 
@@ -29,420 +19,198 @@ export type Service = {
 
 export const services: Service[] = [
   {
-    slug: "civil-y-contratos",
-    title: "Civil y Contratos",
-    icon: "scroll",
-    short: "Contratos, incumplimientos y conflictos entre particulares.",
-    summary:
-      "Redactamos, revisamos y negociamos contratos para que te protejan de verdad. Y si algo sale mal, reclamamos el cumplimiento o la reparación que corresponde.",
-    keywords: [
-      "contrato",
-      "incumplimiento",
-      "deuda",
-      "cobro",
-      "pagaré",
-      "carta documento",
-      "prescripción",
-      "vecino",
-      "obligación",
-    ],
-    cases: [
-      "Redacción y revisión de contratos",
-      "Incumplimientos contractuales",
-      "Cobro de deudas y ejecuciones",
-      "Cartas documento e intimaciones",
-      "Conflictos entre vecinos y consorcios",
-      "Mediaciones prejudiciales",
-    ],
-    faqs: [
-      {
-        question: "¿Necesito un abogado para firmar un contrato?",
-        answer:
-          "No es obligatorio, pero una revisión previa evita cláusulas abusivas o ambiguas que después cuestan mucho más resolver.",
-      },
-      {
-        question: "¿Qué hago si recibí una carta documento?",
-        answer:
-          "No la ignores: suele tener plazos. Traela a una consulta y definimos si conviene responder y en qué términos.",
-      },
-    ],
-  },
-  {
-    slug: "familia-y-sucesiones",
-    title: "Familia y Sucesiones",
-    icon: "users",
-    short: "Divorcios, alimentos, cuidado de hijos y herencias.",
-    summary:
-      "Acompañamos procesos familiares con sensibilidad y firmeza. Priorizamos acuerdos que protejan a los chicos y resolvemos sucesiones de forma ordenada.",
-    keywords: [
-      "divorcio",
-      "separación",
-      "alimentos",
-      "cuota alimentaria",
-      "hijos",
-      "régimen de comunicación",
-      "tenencia",
-      "cuidado personal",
-      "herencia",
-      "sucesión",
-      "testamento",
-      "fallecimiento",
-      "adopción",
-      "violencia familiar",
-    ],
-    cases: [
-      "Divorcio de común acuerdo o unilateral",
-      "Cuota alimentaria y actualización",
-      "Cuidado personal y régimen de comunicación",
-      "Sucesiones y declaratoria de herederos",
-      "Testamentos y planificación patrimonial",
-      "Uniones convivenciales",
-    ],
-    faqs: [
-      {
-        question: "¿Cuánto demora un divorcio?",
-        answer:
-          "Si hay acuerdo sobre bienes e hijos, puede resolverse en pocos meses. Sin acuerdo, depende de los puntos en discusión.",
-      },
-      {
-        question: "¿Es obligatorio iniciar la sucesión?",
-        answer:
-          "Es necesaria para transferir o vender los bienes del fallecido a nombre de los herederos. Cuanto antes se inicie, más simple suele ser.",
-      },
-    ],
-  },
-  {
     slug: "laboral",
-    title: "Laboral",
+    title: "Derecho Laboral",
     icon: "briefcase",
-    short: "Despidos, indemnizaciones y trabajo no registrado.",
+    short: "Asesoramiento y representación de trabajadores en conflictos laborales.",
     summary:
-      "Defendemos tus derechos laborales frente a despidos, diferencias salariales o accidentes. También asesoramos a empleadores para prevenir conflictos.",
+      "Asesoramiento y representación de trabajadores en conflictos laborales, con atención personalizada en cada etapa del reclamo.",
     keywords: [
       "despido",
       "indemnización",
+      "trabajo no registrado",
       "trabajo en negro",
-      "no registrado",
-      "art",
       "accidente laboral",
-      "acoso laboral",
-      "renuncia",
-      "telegrama",
-      "liquidación final",
-      "empleador",
+      "art",
+      "seclo",
       "sueldo",
+      "salario",
+      "acoso laboral",
+      "violencia laboral",
+      "acuerdo laboral",
     ],
     cases: [
-      "Despidos con o sin causa",
-      "Trabajo no registrado o mal registrado",
-      "Accidentes y enfermedades laborales (ART)",
-      "Diferencias salariales y horas extra",
+      "Despidos e indemnizaciones",
+      "Trabajo no registrado",
+      "Accidentes laborales y ART",
+      "Acuerdos laborales y SECLO",
+      "Reclamos salariales",
       "Acoso y violencia laboral",
-      "Asesoramiento preventivo a empleadores",
     ],
     faqs: [
       {
-        question: "Me despidieron, ¿qué hago primero?",
+        question: "Me despidieron, ¿qué conviene hacer primero?",
         answer:
-          "No firmes nada sin asesorarte y guardá recibos, mensajes y cualquier prueba de la relación laboral. Los plazos para reclamar corren.",
+          "No firmes nada sin asesorarte y guardá recibos, mensajes y cualquier prueba de la relación laboral. En la consulta revisamos tu situación y los pasos posibles.",
       },
       {
-        question: "¿Cuánto cuesta iniciar un reclamo laboral?",
+        question: "¿Atienden accidentes de trabajo y reclamos ante la ART?",
         answer:
-          "En la mayoría de los casos trabajamos con honorarios a resultado: cobrás vos y recién ahí cobramos nosotros.",
+          "Sí. Acompañamos accidentes laborales y gestiones vinculadas a la ART, además de despidos, trabajo no registrado y reclamos salariales.",
+      },
+    ],
+  },
+  {
+    slug: "familia",
+    title: "Derecho de Familia",
+    icon: "users",
+    short: "Acompañamiento jurídico en situaciones familiares, con atención personalizada.",
+    summary:
+      "Acompañamiento jurídico en situaciones familiares que requieren atención profesional y personalizada.",
+    keywords: [
+      "divorcio",
+      "alimentos",
+      "cuota alimentaria",
+      "cuidado personal",
+      "régimen de comunicación",
+      "tenencia",
+      "hijos",
+      "compensación económica",
+      "apellido",
+      "cese de alimentos",
+    ],
+    cases: [
+      "Cuota alimentaria",
+      "Divorcios",
+      "Régimen de comunicación y cuidado personal",
+      "Compensación económica",
+      "Modificación y cese de alimentos",
+      "Cambio de apellido",
+    ],
+    faqs: [
+      {
+        question: "¿Puedo consultar por alimentos o por el cuidado de mis hijos?",
+        answer:
+          "Sí. El estudio acompaña cuota alimentaria, modificación o cese de alimentos, régimen de comunicación y cuidado personal.",
+      },
+      {
+        question: "¿El divorcio se atiende de forma personalizada?",
+        answer:
+          "Sí. Cada situación familiar se escucha con tiempo, para definir el camino más adecuado antes de avanzar.",
       },
     ],
   },
   {
     slug: "penal",
-    title: "Penal",
+    title: "Derecho Penal",
     icon: "gavel",
-    short: "Defensa penal, querellas y asistencia inmediata.",
+    short: "Acompañamiento en procesos penales, con atención a los derechos de las víctimas.",
     summary:
-      "Defensa técnica desde el primer momento: detenciones, citaciones e imputaciones. También representamos a víctimas como querellantes.",
+      "Asesoramiento y acompañamiento jurídico en procesos penales, con especial atención a los derechos de las víctimas.",
     keywords: [
-      "denuncia",
-      "detenido",
-      "detención",
-      "imputado",
-      "citación",
-      "indagatoria",
+      "víctima",
       "querella",
-      "estafa",
-      "robo",
-      "delito",
+      "denuncia",
       "causa penal",
-      "excarcelación",
+      "ejecución penal",
+      "defensa",
+      "delito",
+      "imputado",
+      "derechos y garantías",
     ],
     cases: [
-      "Defensa en causas penales",
-      "Asistencia ante detenciones",
-      "Querellas por víctimas",
-      "Delitos económicos y estafas",
-      "Delitos de tránsito",
-      "Excarcelaciones y probation",
+      "Asistencia y representación de víctimas",
+      "Querellas y denuncias penales",
+      "Seguimiento de causas judiciales",
+      "Ejecución penal",
+      "Asesoramiento sobre derechos y garantías",
+      "Defensa",
     ],
     faqs: [
       {
-        question: "Me citaron a declarar, ¿tengo que ir con abogado?",
+        question: "¿Acompañan a víctimas de un delito?",
         answer:
-          "Sí. Tenés derecho a contar con defensa antes de declarar y a no declarar si así lo decidís con tu abogado.",
+          "Sí. El estudio brinda asistencia y representación de víctimas, querellas, denuncias y seguimiento de la causa.",
       },
       {
-        question: "¿Atienden urgencias fuera de horario?",
+        question: "¿También hay defensa penal?",
         answer:
-          "Sí, contamos con guardia para detenciones y situaciones urgentes. Usá el teléfono de contacto.",
+          "Sí. Además del acompañamiento a víctimas, el estudio asesora y defiende en procesos penales, con información sobre derechos y garantías.",
       },
     ],
   },
   {
-    slug: "comercial-y-societario",
-    title: "Comercial y Societario",
-    icon: "building",
-    short: "Sociedades, contratos comerciales y empresas.",
-    summary:
-      "Acompañamos a emprendedores y pymes desde la constitución de la sociedad hasta su crecimiento: contratos, socios, marcas y conflictos comerciales.",
-    keywords: [
-      "sociedad",
-      "sas",
-      "srl",
-      "empresa",
-      "pyme",
-      "socios",
-      "emprendimiento",
-      "marca",
-      "franquicia",
-      "concurso",
-      "quiebra",
-      "acuerdo de socios",
-    ],
-    cases: [
-      "Constitución de SAS, SRL y SA",
-      "Acuerdos de socios",
-      "Contratos comerciales y de distribución",
-      "Registro de marcas",
-      "Conflictos societarios",
-      "Concursos y quiebras",
-    ],
-    faqs: [
-      {
-        question: "¿Qué tipo de sociedad me conviene?",
-        answer:
-          "Depende de la cantidad de socios, el capital y los planes de crecimiento. Lo analizamos en una consulta inicial.",
-      },
-      {
-        question: "¿Por qué hacer un acuerdo de socios?",
-        answer:
-          "Porque define qué pasa ante desacuerdos, salidas o incorporaciones antes de que el conflicto exista.",
-      },
-    ],
-  },
-  {
-    slug: "inmobiliario",
-    title: "Inmobiliario",
-    icon: "house",
-    short: "Compraventas, alquileres, desalojos y escrituras.",
-    summary:
-      "Revisamos cada operación inmobiliaria para que compres, vendas o alquiles con seguridad. Y resolvemos conflictos entre propietarios e inquilinos.",
-    keywords: [
-      "alquiler",
-      "inquilino",
-      "propietario",
-      "desalojo",
-      "compraventa",
-      "escritura",
-      "boleto",
-      "departamento",
-      "casa",
-      "terreno",
-      "usucapión",
-      "consorcio",
-    ],
-    cases: [
-      "Boletos de compraventa y escrituración",
-      "Contratos de locación",
-      "Desalojos",
-      "Usucapión",
-      "Conflictos de consorcio y propiedad horizontal",
-      "Due diligence de inmuebles",
-    ],
-    faqs: [
-      {
-        question: "¿Conviene que un abogado revise el boleto?",
-        answer:
-          "Sí. El boleto fija las condiciones de la operación; revisarlo antes de firmar evita sorpresas en la escrituración.",
-      },
-      {
-        question: "¿Cuánto demora un desalojo?",
-        answer:
-          "Depende de la causal y de la jurisdicción. Te damos una estimación concreta al analizar el contrato y la situación.",
-      },
-    ],
-  },
-  {
-    slug: "previsional",
-    title: "Previsional",
-    icon: "landmark",
-    short: "Jubilaciones, pensiones y reajustes ante ANSES.",
-    summary:
-      "Tramitamos jubilaciones y pensiones y reclamamos reajustes de haberes. Te decimos con claridad qué te corresponde y cómo obtenerlo.",
-    keywords: [
-      "jubilación",
-      "jubilarme",
-      "pensión",
-      "anses",
-      "reajuste",
-      "haberes",
-      "aportes",
-      "moratoria",
-      "retiro",
-      "invalidez",
-      "viudez",
-    ],
-    cases: [
-      "Trámites de jubilación",
-      "Pensiones por fallecimiento",
-      "Reajuste de haberes",
-      "Reconocimiento de servicios y aportes",
-      "Retiro por invalidez",
-      "Reclamos administrativos y judiciales",
-    ],
-    faqs: [
-      {
-        question: "¿Puedo jubilarme si me faltan aportes?",
-        answer:
-          "Existen alternativas según tu situación. Analizamos tu historia laboral para encontrar la mejor opción disponible.",
-      },
-      {
-        question: "¿Qué es un reajuste de haberes?",
-        answer:
-          "Es el reclamo para que tu jubilación se calcule o actualice correctamente cuando ANSES aplicó criterios que te perjudican.",
-      },
-    ],
-  },
-  {
-    slug: "danos-y-perjuicios",
-    title: "Daños y Perjuicios",
+    slug: "civil-y-danos",
+    title: "Derecho Civil y Daños",
     icon: "shield",
-    short: "Accidentes de tránsito, mala praxis y reparaciones.",
+    short: "Accidentes de tránsito, aseguradoras, mediaciones y daños.",
     summary:
-      "Si sufriste un daño por culpa de otro, reclamamos una indemnización justa ante aseguradoras y responsables, con o sin juicio.",
+      "Reclamos por accidentes de tránsito y otros daños, gestiones ante compañías aseguradoras, mediaciones y acuerdos.",
     keywords: [
       "accidente",
-      "choque",
       "tránsito",
-      "lesiones",
-      "seguro",
+      "choque",
       "aseguradora",
-      "mala praxis",
-      "indemnización",
-      "daño",
-      "caída",
-      "moto",
-      "auto",
+      "seguro",
+      "mediación",
+      "daños y perjuicios",
+      "daños",
+      "acuerdo extrajudicial",
     ],
     cases: [
       "Accidentes de tránsito",
-      "Reclamos a aseguradoras",
-      "Mala praxis médica",
-      "Lesiones y caídas en la vía pública",
-      "Daño moral",
-      "Daños a la propiedad",
+      "Reclamos ante compañías aseguradoras",
+      "Mediaciones",
+      "Daños y perjuicios",
+      "Acuerdos extrajudiciales",
     ],
     faqs: [
       {
-        question: "Tuve un choque, ¿qué tengo que guardar?",
+        question: "Tuve un accidente de tránsito, ¿qué puedo hacer?",
         answer:
-          "Datos del otro conductor y su seguro, fotos, testigos, la denuncia policial si la hubo y todos los certificados médicos.",
+          "Guardá fotos, datos del otro vehículo, el parte y cualquier comunicación de la aseguradora. En la consulta vemos el reclamo y si conviene una mediación o un acuerdo.",
       },
       {
-        question: "¿Tengo que pagar para iniciar el reclamo?",
+        question: "¿Trabajan con compañías de seguros?",
         answer:
-          "Generalmente trabajamos con honorarios a resultado, sin costos iniciales para el cliente.",
+          "Sí. Acompañamos reclamos ante compañías aseguradoras, mediaciones y acuerdos extrajudiciales.",
       },
     ],
   },
   {
-    slug: "defensa-del-consumidor",
-    title: "Defensa del Consumidor",
-    icon: "shopping",
-    short: "Reclamos a empresas, bancos y servicios.",
+    slug: "sucesiones",
+    title: "Sucesiones y Derechos Patrimoniales",
+    icon: "scroll",
+    short: "Sucesiones, declaratorias de herederos y derechos posesorios.",
     summary:
-      "Hacemos valer la Ley de Defensa del Consumidor frente a empresas, bancos, prepagas, aerolíneas y proveedores de servicios que no cumplen.",
+      "Acompañamiento en sucesiones, declaratorias de herederos, cesiones de derechos y asesoramiento sobre derechos posesorios.",
     keywords: [
-      "consumidor",
-      "empresa",
-      "banco",
-      "tarjeta",
-      "prepaga",
-      "obra social",
-      "aerolínea",
-      "vuelo",
-      "garantía",
-      "compra online",
-      "reclamo",
-      "servicio",
-      "cobro indebido",
+      "sucesión",
+      "herencia",
+      "herederos",
+      "declaratoria",
+      "cesión de derechos",
+      "posesión",
+      "posesorio",
+      "fallecimiento",
+      "bienes",
     ],
     cases: [
-      "Reclamos a bancos y tarjetas",
-      "Prepagas y obras sociales",
-      "Vuelos cancelados o demorados",
-      "Productos defectuosos y garantías",
-      "Compras online",
-      "Cobros indebidos de servicios",
+      "Sucesiones",
+      "Declaratorias de herederos",
+      "Cesiones de derechos",
+      "Asesoramiento sobre derechos posesorios",
     ],
     faqs: [
       {
-        question: "¿Vale la pena reclamar por montos chicos?",
+        question: "¿Cuándo conviene iniciar una sucesión?",
         answer:
-          "Muchas veces sí: la ley prevé mecanismos ágiles y, en algunos casos, sanciones adicionales para la empresa.",
+          "Cuando hace falta determinar quiénes son los herederos o disponer de los bienes de una persona fallecida. En la consulta revisamos la documentación y el estado de los bienes.",
       },
       {
-        question: "¿Primero tengo que reclamar a la empresa?",
+        question: "¿Asesoran sobre derechos posesorios?",
         answer:
-          "Es recomendable dejar constancia del reclamo. Guardá números de gestión, mails y capturas.",
-      },
-    ],
-  },
-  {
-    slug: "tributario",
-    title: "Tributario",
-    icon: "receipt",
-    short: "Impuestos, ARCA y planificación fiscal.",
-    summary:
-      "Asesoramos a personas y empresas en su situación fiscal, planes de pago, inspecciones y defensa ante intimaciones del fisco.",
-    keywords: [
-      "impuestos",
-      "arca",
-      "afip",
-      "agip",
-      "arba",
-      "monotributo",
-      "ganancias",
-      "intimación fiscal",
-      "inspección",
-      "plan de pago",
-      "embargo fiscal",
-      "planificación fiscal",
-    ],
-    cases: [
-      "Defensa ante inspecciones y determinaciones",
-      "Intimaciones y ejecuciones fiscales",
-      "Planificación fiscal",
-      "Planes de pago y regularización",
-      "Impuestos provinciales y municipales",
-      "Asesoramiento a monotributistas",
-    ],
-    faqs: [
-      {
-        question: "Recibí una intimación de ARCA, ¿qué hago?",
-        answer:
-          "Revisá el plazo de respuesta y consultanos cuanto antes: una respuesta correcta a tiempo evita multas y embargos.",
-      },
-      {
-        question: "¿Trabajan junto a mi contador?",
-        answer: "Sí, coordinamos con tu contador para cubrir tanto lo contable como lo legal.",
+          "Sí. Además de sucesiones y declaratorias de herederos, el estudio asesora sobre cesiones de derechos y derechos posesorios.",
       },
     ],
   },
@@ -464,14 +232,14 @@ export const processSteps = [
   },
   {
     title: "Diagnóstico y estrategia",
-    text: "Te explicamos opciones, riesgos, plazos y honorarios por escrito, sin letra chica.",
+    text: "Te explicamos opciones, riesgos y próximos pasos, con lenguaje claro.",
   },
   {
     title: "Acción",
-    text: "Negociamos, mediamos o litigamos según lo que más te convenga.",
+    text: "Negociamos, mediamos o representamos según lo que más te convenga.",
   },
   {
     title: "Seguimiento",
-    text: "Te mantenemos informado en cada avance hasta cerrar el caso.",
+    text: "Te mantenemos al tanto de cada avance hasta cerrar el caso.",
   },
 ] as const;

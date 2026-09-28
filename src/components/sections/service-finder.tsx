@@ -6,7 +6,7 @@ import { useDeferredValue, useId, useMemo, useState } from "react";
 import { searchServices } from "@/lib/service-search";
 import { openAssistant } from "@/lib/assistant-events";
 
-const EXAMPLES = ["Me despidieron", "Choqué con el auto", "Quiero divorciarme", "Me intimó ARCA"];
+const EXAMPLES = ["Me despidieron", "Choqué con el auto", "Quiero divorciarme", "Sucesión"];
 
 export function ServiceFinder() {
   const [query, setQuery] = useState("");
@@ -80,7 +80,7 @@ export function ServiceFinder() {
             </ul>
           </>
         ) : hasQuery ? (
-          <p className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             No encontramos un área exacta. Probá con otras palabras o{" "}
             <button
               type="button"
@@ -90,9 +90,9 @@ export function ServiceFinder() {
               consultá al asistente
             </button>
             .
-          </p>
+          </div>
         ) : (
-          <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>Por ejemplo:</span>
             {EXAMPLES.map((ex) => (
               <button
@@ -104,7 +104,7 @@ export function ServiceFinder() {
                 {ex}
               </button>
             ))}
-          </p>
+          </div>
         )}
       </div>
     </div>

@@ -1,12 +1,13 @@
 import { ContactForm } from "@/components/forms/contact-form";
 import { PageHeader } from "@/components/sections/page-header";
+import { PageShell } from "@/components/sections/page-shell";
 import { getService } from "@/content/services";
 import { site } from "@/content/site";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Contacto",
-  description: `Escribinos tu consulta. ${site.contact.hours}. Respuesta en menos de 24 horas hábiles.`,
+  description: `Escribinos tu consulta. Atención personalizada en ${site.contact.location}.`,
   path: "/contacto",
 });
 
@@ -16,7 +17,7 @@ export default async function ContactPage(props: PageProps<"/contacto">) {
   const { contact } = site;
 
   return (
-    <>
+    <PageShell photo="contacto">
       <PageHeader
         eyebrow="Contacto"
         title={
@@ -26,7 +27,7 @@ export default async function ContactPage(props: PageProps<"/contacto">) {
             <em>tu situación.</em>
           </>
         }
-        lead="Te respondemos en menos de 24 horas hábiles con una primera orientación y los próximos pasos."
+        lead="Contanos tu situación. Te orientamos sobre el área que corresponde y los próximos pasos."
       />
 
       <section className="container-page grid gap-16 md:grid-cols-12">
@@ -62,19 +63,11 @@ export default async function ContactPage(props: PageProps<"/contacto">) {
             </a>
           </div>
           <address className="not-italic">
-            <p className="eyebrow">Oficina</p>
-            <p className="mt-2 text-lg">
-              {contact.address.street}
-              <br />
-              {contact.address.city}
-            </p>
-            <p className="mt-2 text-muted-foreground">{contact.hours}</p>
+            <p className="eyebrow">Atención</p>
+            <p className="mt-2 text-lg">{contact.location}</p>
           </address>
-          <p className="border-t border-border pt-6 text-sm text-muted-foreground">
-            Urgencias penales (detenciones): llamá al teléfono del estudio, contamos con guardia.
-          </p>
         </aside>
       </section>
-    </>
+    </PageShell>
   );
 }

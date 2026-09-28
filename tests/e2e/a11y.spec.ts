@@ -34,11 +34,4 @@ test.describe("accesibilidad WCAG 2.2 AA", () => {
     await skip.press("Enter");
     await expect(page).toHaveURL(/#contenido$/);
   });
-
-  test("funciona en modo oscuro sin problemas de contraste", async ({ page }) => {
-    await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-    await page.goto("/");
-    const results = await new AxeBuilder({ page }).withTags(["wcag2aa"]).analyze();
-    expect(results.violations.map((v) => v.id)).toEqual([]);
-  });
 });
