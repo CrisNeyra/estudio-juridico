@@ -7,7 +7,7 @@ export const site = {
   tagline: "Estudio jurídico",
   description:
     "Asesoramiento jurídico integral, acompañamiento profesional y defensa de tus derechos. Atención personalizada en la Ciudad Autónoma de Buenos Aires y en la Provincia de Buenos Aires.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000",
   locale: "es_AR",
   contact: {
     email: "paula.f.sardo@gmail.com",
