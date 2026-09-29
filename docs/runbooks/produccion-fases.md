@@ -141,41 +141,54 @@ dominio propio: verificá el dominio en Resend, From tipo
 
 ---
 
-## Fase 3 — Upstash + Turnstile
+## Fase 3 — Turnstile (Upstash opcional)
 
-### 3.1 Upstash
+Proyecto Vercel: **estudiosardoflorencia**  
+Sitio: https://estudiosardoflorencia.vercel.app  
+Variables en:
+https://vercel.com/crisneyra13-projects/estudiosardoflorencia/settings/environment-variables
 
-**PASO 1 — Redis**
+**Upstash no es obligatorio.** Sin Redis el rate limit usa memoria por
+instancia (aceptable si Turnstile está activo). Si más adelante querés Redis
+compartido: reusá el DB free de otro proyecto (mismas REST URL/TOKEN) o creá
+uno nuevo en https://console.upstash.com.
 
-- Ubicación: https://console.upstash.com → Redis → Create
-- Acción: región cercana (South America si está disponible).
-- Verificación: el database figura Active.
+Las keys de Turnstile pueden figurar en la lista pero estar vacías: hay que
+**editarlas** con valores reales.
 
-**PASO 2 — Variables**
-
-| Variable                   | Valor      |
-| -------------------------- | ---------- |
-| `UPSTASH_REDIS_REST_URL`   | REST URL   |
-| `UPSTASH_REDIS_REST_TOKEN` | REST TOKEN |
-
-- Verificación: Redeploy sin errores.
-
-### 3.2 Cloudflare Turnstile
+### 3.1 Cloudflare Turnstile
 
 **PASO 1 — Sitio**
 
-- Ubicación: https://dash.cloudflare.com → Turnstile → Add site
-- Acción: agregá `*.vercel.app` y, si aplica, el dominio propio.
+- Ubicación: https://dash.cloudflare.com → Turnstile → Add widget / Add site
+- Acción: nombre ej. `Estudio Sardo`. Hostnames:
+  - `estudiosardoflorencia.vercel.app`
+  - `*.vercel.app` (si lo ofrece)
+  - más adelante el dominio propio
+    Widget Mode: Managed. Create → copiá **Site Key** y **Secret Key**.
 - Verificación: Site Key y Secret Key visibles.
 
-**PASO 2 — Variables**
+**PASO 2 — Pegar en Vercel**
 
 | Variable                         | Valor      |
 | -------------------------------- | ---------- |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | site key   |
 | `TURNSTILE_SECRET_KEY`           | secret key |
 
-- Verificación: Redeploy → `/contacto` y `/turnos` muestran el widget y envían OK.
+- Ubicación: Environment Variables de **estudiosardoflorencia**
+- Acción: editá ambas → Production (y Preview) → Save. `NEXT_PUBLIC_…` debe ser
+  el Site Key (público); el Secret no va en el frontend.
+- Verificación: Redeploy → Ready.
+
+### 3.2 Redeploy y verificar
+
+- Ubicación:
+  https://vercel.com/crisneyra13-projects/estudiosardoflorencia/deployments
+- Acción: ⋯ → Redeploy.
+- Verificación:
+  - https://estudiosardoflorencia.vercel.app/contacto → aparece el widget
+    Turnstile (casilla Cloudflare) y el envío funciona.
+  - https://estudiosardoflorencia.vercel.app/turnos → igual.
 
 ---
 
