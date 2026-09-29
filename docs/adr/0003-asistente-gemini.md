@@ -11,7 +11,7 @@ asesoramiento legal (responsabilidad profesional) ni recolectar datos sensibles.
 ## Decisión
 
 - **Vercel AI SDK** (`streamText` + `useChat`): streaming, cancelación y un proveedor intercambiable en una línea.
-- **Google Gemini** (`gemini-3.8-flash`, configurable con `GEMINI_MODEL`): bajo costo y latencia, buen español.
+- **Google Gemini** (`gemini-3.5-flash-lite` por defecto, configurable con `GEMINI_MODEL`; alternativa `gemini-3.8-flash`): bajo costo y latencia, buen español.
 - Guardarraíles:
   - System prompt que prohíbe asesoramiento concreto, pide no compartir datos sensibles, deriva urgencias (911, 144)
     y está redactado para resistir inyecciones de prompt.

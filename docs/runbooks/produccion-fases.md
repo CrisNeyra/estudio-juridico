@@ -65,51 +65,76 @@ Después de cada cambio de variables: **Redeploy** en Vercel.
 
 ## Fase 2 — Resend + Gemini
 
-### 2.1 Resend (email)
+Proyecto Vercel correcto: **estudiosardoflorencia** (no uses `estudio-juridico`).
+Sitio: https://estudiosardoflorencia.vercel.app
 
-**PASO 1 — Cuenta y API key**
+Variables ya cargadas: `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`
+(`onboarding@resend.dev`), `GEMINI_MODEL`, `NEXT_PUBLIC_SITE_URL`.
+Falta cargar (si aún no lo hiciste): `RESEND_API_KEY` y
+`GOOGLE_GENERATIVE_AI_API_KEY`.
 
-- Ubicación: https://resend.com → API Keys
-- Acción: creá una key y guardala en el gestor de contraseñas.
-- Verificación: la key empieza con `re_`.
+### 2.1 Gemini (asistente)
 
-**PASO 2 — Remitente**
+**PASO 1 — Crear la API key**
 
-- Ubicación: Resend → Domains (o remitente de prueba)
-- Acción:
-  - Sin dominio propio: From de prueba `onboarding@resend.dev` (solo a tu propio mail).
-  - Con dominio: verificá el dominio (DNS) y usá
-    `Dra. Paula Sardo <consultas@tudominio.com.ar>`.
-- Verificación: el dominio figura como Verified, o aceptás el límite del From de prueba.
+- Ubicación: https://aistudio.google.com/apikey (cuenta Google)
+- Acción: Create API key → copiá la key (solo se ve una vez) y guardala.
+- Verificación: tenés un string largo (suele empezar con `AIza`).
 
-**PASO 3 — Variables en Vercel**
+**PASO 2 — Pegarla en Vercel**
+
+- Ubicación:
+  https://vercel.com/crisneyra13-projects/estudiosardoflorencia/settings/environment-variables
+- Acción: editá `GOOGLE_GENERATIVE_AI_API_KEY` → pegá la key → Production
+  (y Preview si aparece) → Save. No la dejes en blanco.
+- Verificación: la variable figura en la lista (el valor queda oculto).
+
+**PASO 3 — Modelo (opcional)**
+
+| Variable       | Valor recomendado       |
+| -------------- | ----------------------- |
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite` |
+
+Si `gemini-3.8-flash` responde “high demand”, usá `gemini-3.5-flash-lite`.
+
+### 2.2 Resend (email)
+
+**PASO 1 — Crear la API key**
+
+- Ubicación: https://resend.com/api-keys (login Google o GitHub)
+- Acción: Create API Key → nombre ej. `estudio-sardo-prod` → Create → copiá la key.
+- Verificación: empieza con `re_`.
+
+**PASO 2 — Pegarla en Vercel**
+
+- Ubicación: misma pantalla de Environment Variables de **estudiosardoflorencia**
+- Acción: editá `RESEND_API_KEY` con la key `re_…` → Production → Save.
+- Verificación: aparece en la lista.
+
+**PASO 3 — Confirmar remitente**
 
 | Variable             | Valor                     |
 | -------------------- | ------------------------- |
-| `RESEND_API_KEY`     | la API key                |
 | `CONTACT_TO_EMAIL`   | `paula.f.sardo@gmail.com` |
-| `CONTACT_FROM_EMAIL` | el From verificado        |
+| `CONTACT_FROM_EMAIL` | `onboarding@resend.dev`   |
 
-- Verificación: Redeploy OK. Enviá `/contacto` → llega el mail. Pedí un turno de
-  prueba → mail al estudio y al visitante.
+Con From de prueba, Resend solo envía al mail de la cuenta Resend. Con dominio
+propio después: From tipo `Dra. Paula Sardo <consultas@tudominio.com.ar>`.
 
-### 2.2 Gemini (asistente)
+### 2.3 Redeploy (obligatorio)
 
-**PASO 1 — API key**
+- Ubicación:
+  https://vercel.com/crisneyra13-projects/estudiosardoflorencia/deployments
+- Acción: deployment Production más reciente → ⋯ → **Redeploy**.
+- Verificación: estado **Ready** (1–3 min).
 
-- Ubicación: https://aistudio.google.com/apikey
-- Acción: creá la key.
-- Verificación: la key se muestra una vez; guardala.
+### 2.4 Verificar
 
-**PASO 2 — Variables**
-
-| Variable                       | Valor                                        |
-| ------------------------------ | -------------------------------------------- |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | la key                                       |
-| `GEMINI_MODEL`                 | `gemini-3.8-flash` (opcional; es el default) |
-
-- Verificación: Redeploy → Asistente → “me despidieron” → respuesta en streaming
-  (no 503). Revisá el tono con la Dra. antes de promocionar el chat
+- Asistente: https://estudiosardoflorencia.vercel.app → “Me despidieron” →
+  respuesta en texto (no 503 / “no disponible”).
+- Contacto: https://estudiosardoflorencia.vercel.app/contacto → envío de prueba
+  → llega el mail.
+- Revisá el tono con la Dra. antes de promocionar el chat
   (`src/lib/ai/system-prompt.ts`).
 
 ---

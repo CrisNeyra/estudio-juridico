@@ -8,7 +8,7 @@ import { z } from "zod";
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   GOOGLE_GENERATIVE_AI_API_KEY: z.string().min(1).optional(),
-  GEMINI_MODEL: z.string().min(1).default("gemini-3.8-flash"),
+  GEMINI_MODEL: z.string().min(1).default("gemini-3.5-flash-lite"),
   AI_MOCK: z.enum(["0", "1"]).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   CONTACT_TO_EMAIL: z.email().optional(),
