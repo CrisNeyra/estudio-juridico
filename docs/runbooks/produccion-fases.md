@@ -113,13 +113,15 @@ Si `gemini-3.8-flash` responde “high demand”, usá `gemini-3.5-flash-lite`.
 
 **PASO 3 — Confirmar remitente**
 
-| Variable             | Valor                     |
-| -------------------- | ------------------------- |
-| `CONTACT_TO_EMAIL`   | `paula.f.sardo@gmail.com` |
-| `CONTACT_FROM_EMAIL` | `onboarding@resend.dev`   |
+| Variable             | Valor (prueba sin dominio)                        |
+| -------------------- | ------------------------------------------------- |
+| `CONTACT_TO_EMAIL`   | el mail de la cuenta Resend (ej. `crisneyra13@…`) |
+| `CONTACT_FROM_EMAIL` | `onboarding@resend.dev`                           |
 
-Con From de prueba, Resend solo envía al mail de la cuenta Resend. Con dominio
-propio después: From tipo `Dra. Paula Sardo <consultas@tudominio.com.ar>`.
+Con From de prueba, Resend **solo** entrega al email de la cuenta Resend. Con
+dominio propio: verificá el dominio en Resend, From tipo
+`Dra. Paula Sardo <consultas@tudominio.com.ar>` y
+`CONTACT_TO_EMAIL` = `paula.f.sardo@gmail.com`.
 
 ### 2.3 Redeploy (obligatorio)
 
