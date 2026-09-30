@@ -281,7 +281,7 @@ export function BookingForm({
       <div className="flex flex-col gap-6 sm:col-span-2">
         <ConsentCheckbox
           error={e.consent}
-          text="Acepto que el estudio use estos datos para gestionar mi turno."
+          text="Acepto el tratamiento de estos datos para gestionar mi turno."
         />
         <TurnstileWidget />
         <Honeypot />

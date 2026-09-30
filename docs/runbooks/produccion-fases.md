@@ -194,47 +194,82 @@ Las keys de Turnstile pueden figurar en la lista pero estar vacías: hay que
 
 ## Fase 4 — Supabase
 
-Seguí también [supabase-setup.md](supabase-setup.md) y [asignar-roles.md](asignar-roles.md).
+Proyecto Vercel: **estudiosardoflorencia**  
+Sitio: https://estudiosardoflorencia.vercel.app  
+Portal: https://estudiosardoflorencia.vercel.app/portal/login  
+Variables:
+https://vercel.com/crisneyra13-projects/estudiosardoflorencia/settings/environment-variables
 
-**PASO 1 — Proyecto**
+Código y migración ya están en el repo. Detalle extra:
+[supabase-setup.md](supabase-setup.md) y [asignar-roles.md](asignar-roles.md).
 
-- Ubicación: https://supabase.com/dashboard → New project
-- Acción: nombre `estudio-juridico`, región **South America (São Paulo)**,
-  contraseña fuerte guardada.
-- Verificación: estado Healthy.
+**Importante:** `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+deben ser **Config / Encrypted**, no Secret/Sensitive (igual que Turnstile).
+Si figuran como Secret, el portal muestra «Próximamente».
 
-**PASO 2 — Migración**
+**PASO 1 — Proyecto Supabase**
 
-- Ubicación: SQL Editor → New query
-- Acción: pegá y ejecutá `supabase/migrations/20260927000000_init.sql`.
-- Verificación: tablas con RLS; bucket `documents` privado.
+- Ubicación: https://supabase.com/dashboard → **New project**
+- Acción: nombre `estudio-juridico`, organización la tuya, región
+  **South America (São Paulo)**, contraseña de DB fuerte (guardala).
+- Verificación: proyecto **Healthy**.
+
+**PASO 2 — Migración SQL**
+
+- Ubicación: proyecto → **SQL** → **New** / **SQL Editor** → **New query**
+- Acción: abrí en el repo
+  `supabase/migrations/20260927000000_init.sql`, copiá **todo** el archivo,
+  pegalo y **Run**.
+- Verificación:
+  - **Table Editor**: `profiles`, `appointments`, `cases`, `case_events`,
+    `documents`, `audit_log` (RLS / candado).
+  - **Storage**: bucket `documents` (privado).
 
 **PASO 3 — Auth**
 
-- Ubicación: Authentication → Providers / URL Configuration / MFA
-- Acción: desactivá registro público; Site URL = URL de producción;
-  Redirect URLs: `https://TU-URL/portal/auth/callback` y
-  `http://localhost:3000/portal/auth/callback`; TOTP habilitado.
+- Ubicación: **Authentication** → **Providers** (Email) y **URL Configuration**;
+  **Authentication** → **MFA**
+- Acción:
+  1. Email: desactivá **Allow new users to sign up**.
+  2. Site URL: `https://estudiosardoflorencia.vercel.app`
+  3. Redirect URLs (agregá ambas):
+     - `https://estudiosardoflorencia.vercel.app/portal/auth/callback`
+     - `http://localhost:3000/portal/auth/callback`
+  4. MFA: **TOTP** habilitado.
 - Verificación: cambios guardados.
 
-**PASO 4 — Variables (solo anon)**
+**PASO 4 — Claves → Vercel (solo anon)**
 
-| Variable                        | Valor       |
-| ------------------------------- | ----------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon public |
+- Ubicación Supabase: **Project Settings** → **API Keys** / **API**
+  - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
+  - anon / public → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - **No** uses `service_role`.
+- Ubicación Vercel:
+  https://vercel.com/crisneyra13-projects/estudiosardoflorencia/settings/environment-variables
+- Acción: editá o recreá ambas como **Config** (no Secret), entornos
+  Production y Preview → Save.
+- Redeploy:
+  https://vercel.com/crisneyra13-projects/estudiosardoflorencia/deployments
+  → ⋯ → **Redeploy**.
+- Verificación: https://estudiosardoflorencia.vercel.app/portal/login
+  muestra el formulario de ingreso (ya no «Próximamente»).
 
-No uses la `service_role` en la app.
+**PASO 5 — Admin del estudio**
 
-- Verificación: Redeploy → `/portal/login` muestra el formulario (no “Próximamente”).
+- Ubicación: Supabase → **Authentication** → **Users** → **Add user**
+  (Invite / Send invitation) con el email de la Dra. o el tuyo de prueba.
+- SQL Editor:
 
-**PASO 5 — Admin**
+  ```sql
+  update public.profiles
+  set role = 'admin'
+  where email = 'TU-EMAIL@ejemplo.com';
+  ```
 
-- Ubicación: Supabase Users + SQL + sitio `/portal/seguridad`
-- Acción: invitá el email de la Dra.; `update profiles set role = 'admin' …`;
-  activá MFA; entrá a `/admin`.
-- Verificación: panel del estudio visible; turno de prueba aparece y se puede
-  confirmar/cancelar.
+- Sitio: entrá a `/portal/login` → **Seguridad** (`/portal/seguridad`) →
+  activá MFA (TOTP) → `/admin`.
+- Verificación: Panel del estudio; un turno de prueba en `/turnos` aparece
+  y se puede confirmar/cancelar.
 
 ---
 
@@ -256,23 +291,43 @@ No uses la `service_role` en la app.
 
 ## Fase 6 — Revisión legal con la Dra.
 
-Textos en:
+Guía profunda (mapa de datos, gaps, checklist, mail a la Dra., acta):
+[revision-legal.md](revision-legal.md).
 
-- `src/app/(site)/privacidad/page.tsx`
-- `src/app/(site)/aviso-legal/page.tsx`
+URLs:
 
-**Checklist de reunión**
+- https://estudiosardoflorencia.vercel.app/privacidad
+- https://estudiosardoflorencia.vercel.app/aviso-legal
 
-1. Responsable del tratamiento y email de datos (`paula.f.sardo@gmail.com`).
-2. Finalidades: consultas, turnos, portal; sin cookies publicitarias.
-3. Asistente IA (Gemini): no datos sensibles; orientación general.
-4. Derechos Ley 25.326 y cómo ejercerlos.
-5. Aviso legal: no crea relación abogado-cliente hasta aceptación expresa;
-   jurisdicción CABA / PBA.
-6. Si aprueba cambios: editar las páginas, actualizar `updated`, commit y push.
+Código: `src/app/(site)/privacidad/page.tsx`,
+`src/app/(site)/aviso-legal/page.tsx`.
 
-Hasta la aprobación formal, el sitio puede estar online; evitá campañas fuertes
-del formulario si ella aún no firmó los textos.
+**Qué es:** validar que privacidad + aviso legal digan la verdad sobre el
+producto (formularios, turnos, portal, Gemini, Resend, Supabase, Turnstile,
+Analytics) bajo Ley 25.326 y ética profesional. No es un deploy técnico.
+
+**PASO 1 — Leer / preparar**
+
+- Ubicación: [revision-legal.md](revision-legal.md) §§ 2–5
+- Acción: repasá el mapa de datos y el checklist; enviá la pre-lectura (§ 6)
+  a la Dra. con los dos links.
+- Verificación: ella tiene fecha de reunión o feedback por escrito.
+
+**PASO 2 — Reunión / acta**
+
+- Ubicación: checklist § 5 del runbook
+- Acción: decidir responsable, AAIP, plazos, proveedores, WhatsApp,
+  jurisdicción, OK de campañas. Completar “Acta” al final del runbook.
+- Verificación: acta con Sí/No/Ajuste en cada fila.
+
+**PASO 3 — Implementar (después del OK)**
+
+- Acción: pedir al asistente aplicar el acta → editar páginas (y checkbox/
+  prompt si aplica) → `updated` con fecha de aprobación → commit + push.
+- Verificación: releer ambas URLs en producción.
+
+Hasta la aprobación formal el sitio puede estar online; evitá campañas fuertes
+si ella aún no firmó los textos.
 
 ---
 

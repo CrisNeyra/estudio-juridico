@@ -23,8 +23,10 @@ Activa los turnos persistentes y el portal de clientes. Tiempo estimado: 15 minu
 - Ubicación: **Authentication** → **Sign In / Providers** y **URL Configuration**
 - Acción:
   1. En **Email**, desactivá **Allow new users to sign up** (el estudio invita a sus clientes).
-  2. En **URL Configuration**, poné **Site URL** = tu dominio (ej. `https://tu-sitio.vercel.app`) y agregá en
-     **Redirect URLs**: `https://tu-sitio.vercel.app/portal/auth/callback` y `http://localhost:3000/portal/auth/callback`.
+  2. En **URL Configuration**, Site URL =
+     `https://estudiosardoflorencia.vercel.app` y Redirect URLs:
+     `https://estudiosardoflorencia.vercel.app/portal/auth/callback` y
+     `http://localhost:3000/portal/auth/callback`.
   3. En **Multi-Factor**, verificá que **TOTP** esté habilitado.
 - Verificación: los cambios quedan guardados sin errores.
 
@@ -36,9 +38,13 @@ Activa los turnos persistentes y el portal de clientes. Tiempo estimado: 15 minu
 
 **PASO 5 — Cargar las variables**
 
-- Ubicación: local en `.env.local`; en producción en Vercel → Project → **Settings** → **Environment Variables**
-- Acción: definí `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`. En Vercel hacé un **Redeploy**.
-- Verificación: `/portal/login` muestra el formulario de ingreso en lugar de "Próximamente".
+- Ubicación producción:
+  https://vercel.com/crisneyra13-projects/estudiosardoflorencia/settings/environment-variables
+  (local: `.env.local`)
+- Acción: `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` como
+  **Config / Encrypted** (no Secret/Sensitive), Production + Preview → Redeploy.
+- Verificación: https://estudiosardoflorencia.vercel.app/portal/login
+  muestra el formulario (no "Próximamente").
 
 **PASO 6 — Crear tu usuario y hacerte admin**
 

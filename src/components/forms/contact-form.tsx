@@ -136,7 +136,7 @@ export function ContactForm({ defaultArea }: { defaultArea?: string }) {
       <div className="flex flex-col gap-6 sm:col-span-2">
         <ConsentCheckbox
           error={e.consent}
-          text="Acepto que el estudio use estos datos solo para responder mi consulta."
+          text="Acepto el tratamiento de estos datos para responder mi consulta."
         />
         <TurnstileWidget />
         <Honeypot />
