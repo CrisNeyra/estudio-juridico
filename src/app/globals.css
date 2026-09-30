@@ -157,8 +157,9 @@ html.lenis body {
   html {
     scroll-behavior: auto;
   }
+  /* Mantener el frame del video visible; el autoplay lo corta HeroVideo. */
   .hero-video {
-    display: none;
+    animation: none;
   }
   *,
   *::before,

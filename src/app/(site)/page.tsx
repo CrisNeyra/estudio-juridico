@@ -3,6 +3,7 @@ import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { Reveal } from "@/components/motion/reveal";
 import { CtaBand } from "@/components/sections/cta-band";
+import { HeroVideo } from "@/components/sections/hero-video";
 import { ServiceFinder } from "@/components/sections/service-finder";
 import { ServicesIndex } from "@/components/sections/services-index";
 import { processSteps } from "@/content/services";
@@ -16,17 +17,9 @@ export default function HomePage() {
 
       <section className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-          <video
-            className="hero-video size-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster="/videos/hero-poster.jpg"
-          >
-            <source src="/videos/hero.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-white/80" />
+          <HeroVideo />
+          {/* Velo blanco: /70 ≈ 10% menos que el /80 anterior */}
+          <div className="absolute inset-0 bg-white/70" />
         </div>
         <div className="container-page pt-14 pb-24 md:pt-24 md:pb-36">
           <div className="rise">
