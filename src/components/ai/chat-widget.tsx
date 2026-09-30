@@ -46,6 +46,8 @@ export function ChatWidget() {
 
   const busy = status === "submitted" || status === "streaming";
 
+  const pendingPrompt = useRef<string | null>(null);
+
   const send = useCallback(
     (text: string) => {
       const value = text.trim().slice(0, 1500);
@@ -61,14 +63,24 @@ export function ChatWidget() {
     const onOpen = (e: Event) => {
       const { prompt } = (e as CustomEvent<OpenAssistantDetail>).detail ?? {};
       setOpen(true);
-      if (prompt) {
-        if (prompt.endsWith(": ")) setInput(prompt);
-        else send(prompt);
+      if (!prompt) return;
+      if (prompt.endsWith(": ")) {
+        setInput(prompt);
+        return;
       }
+      pendingPrompt.current = prompt.trim().slice(0, 1500);
     };
     window.addEventListener(OPEN_ASSISTANT_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_ASSISTANT_EVENT, onOpen);
-  }, [send]);
+  }, []);
+
+  useEffect(() => {
+    const prompt = pendingPrompt.current;
+    if (!open || !prompt || busy) return;
+    pendingPrompt.current = null;
+    void sendMessage({ text: prompt });
+    setInput("");
+  }, [open, busy, sendMessage]);
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
