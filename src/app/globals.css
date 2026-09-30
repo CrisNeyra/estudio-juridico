@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-instrument-serif);
+  --font-serif: var(--font-newsreader);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -99,7 +99,7 @@
   @apply mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12;
 }
 @utility eyebrow {
-  @apply font-mono text-xs tracking-[0.2em] text-muted-foreground uppercase;
+  @apply font-mono text-sm tracking-[0.2em] text-muted-foreground uppercase;
 }
 @utility display {
   @apply font-serif leading-[0.95] tracking-[-0.02em];
@@ -123,13 +123,45 @@
 @utility section-photo {
   background-color: var(--background);
   background-image:
-    linear-gradient(oklch(1 0 0 / 90%), oklch(1 0 0 / 94%)), var(--section-photo, none);
+    linear-gradient(oklch(1 0 0 / 48%), oklch(1 0 0 / 55%)), var(--section-photo, none);
   background-position: center;
   background-size: cover;
 }
 
 .hero-video {
   animation: hero-fade 1.2s ease both;
+}
+
+@keyframes soft-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(37 211 102 / 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgb(37 211 102 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(37 211 102 / 0);
+  }
+}
+
+.wa-pulse {
+  animation: soft-pulse 2.2s ease-out infinite;
+}
+
+.icon-pulse {
+  animation: icon-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 0.7;
+  }
 }
 
 @keyframes hero-fade {
@@ -158,7 +190,9 @@ html.lenis body {
     scroll-behavior: auto;
   }
   /* Mantener el frame del video visible; el autoplay lo corta HeroVideo. */
-  .hero-video {
+  .hero-video,
+  .wa-pulse,
+  .icon-pulse {
     animation: none;
   }
   *,

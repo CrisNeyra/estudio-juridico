@@ -49,7 +49,7 @@ export function ServiceFinder() {
           type="submit"
           className="inline-flex shrink-0 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-brand"
         >
-          <Sparkles className="size-4" aria-hidden="true" />
+          <Sparkles className="icon-pulse size-4" aria-hidden="true" />
           <span className="hidden sm:inline">Preguntar al asistente</span>
           <span className="sm:hidden">Asistente</span>
         </button>

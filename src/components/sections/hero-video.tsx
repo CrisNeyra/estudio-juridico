@@ -31,7 +31,7 @@ export function HeroVideo() {
   return (
     <video
       ref={ref}
-      className="hero-video absolute inset-0 size-full object-cover"
+      className="hero-video absolute inset-0 size-full object-cover object-[62%_center]"
       autoPlay
       muted
       loop

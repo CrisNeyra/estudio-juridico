@@ -110,7 +110,7 @@ export function ChatWidget() {
         {open ? (
           <X className="size-5" aria-hidden="true" />
         ) : (
-          <MessageCircle className="size-5" aria-hidden="true" />
+          <MessageCircle className="icon-pulse size-5" aria-hidden="true" />
         )}
         <span>{open ? "Cerrar" : "Asistente"}</span>
       </button>
@@ -186,7 +186,7 @@ export function ChatWidget() {
 
               {error ? (
                 <p role="alert" className="text-sm text-destructive">
-                  No pude responder ahora. Podés{" "}
+                  {error.message || "No pude responder ahora."} Podés{" "}
                   <a
                     href={`https://wa.me/${site.contact.whatsapp}`}
                     className="link-underline"

@@ -4,7 +4,7 @@ test.describe("sitio institucional", () => {
   test("la home prioriza los servicios y el buscador sugiere un área", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page).toHaveTitle(/Paula Sardo/);
+    await expect(page).toHaveTitle(/Dra\. Paula F\. Sardo/);
 
     await page
       .getByRole("searchbox", { name: "Contanos qué necesitás resolver" })

@@ -2,7 +2,7 @@
  * Datos institucionales del estudio de la Dra. Paula Florencia Sardo.
  */
 export const site = {
-  name: "Paula Sardo",
+  name: "Dra. Paula F. Sardo",
   legalName: "Dra. Paula Florencia Sardo y asociadxs",
   tagline: "Estudio jurídico",
   description:
