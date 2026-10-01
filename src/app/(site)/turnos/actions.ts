@@ -196,15 +196,21 @@ export async function bookAppointment(
     };
   }
 
+  const delivered = toStudio.ok && "delivered" in toStudio && toStudio.delivered;
+
   logger.info("appointments.booked", {
     area: data.area,
     mode: data.mode,
     persisted: features.supabase,
+    emailed: delivered,
   });
   return {
     status: "success",
-    message:
-      "Te enviamos un email con los detalles. Te confirmamos el turno dentro de las próximas horas hábiles.",
+    message: delivered
+      ? "Te enviamos un email con los detalles. Te confirmamos el turno dentro de las próximas horas hábiles."
+      : features.email
+        ? "Registramos el turno. El aviso al estudio se envió; si no llega el mail, revisá spam o el destinatario de prueba de Resend."
+        : "Registramos el turno en este servidor. En local, sin RESEND_API_KEY el correo no se envía (solo se loguea en la consola).",
     summary: `${area} · ${when} · ${modeLabel}`,
     ics,
   };

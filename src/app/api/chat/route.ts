@@ -57,10 +57,6 @@ function mockResponse(lastUserText: string) {
 }
 
 export async function POST(req: Request) {
-  if (!features.ai) {
-    return json(503, "El asistente no está disponible en este momento.");
-  }
-
   const contentLength = Number(req.headers.get("content-length") ?? 0);
   if (contentLength > 64_000) return json(413, "La conversación es demasiado larga.");
 
@@ -88,9 +84,11 @@ export async function POST(req: Request) {
     return json(400, "Solicitud inválida.");
   }
 
-  if (env.AI_MOCK === "1") {
-    const lastText = last.parts.map((p) => (p.type === "text" ? p.text : "")).join(" ");
-    return mockResponse(lastText);
+  const lastText = last.parts.map((p) => (p.type === "text" ? p.text : "")).join(" ");
+
+  if (!features.ai || env.AI_MOCK === "1") {
+    if (env.AI_MOCK === "1" || env.NODE_ENV !== "production") return mockResponse(lastText);
+    return json(503, "El asistente no está disponible en este momento.");
   }
 
   const result = streamText({

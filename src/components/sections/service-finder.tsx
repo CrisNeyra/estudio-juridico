@@ -55,7 +55,7 @@ export function ServiceFinder() {
         </button>
       </form>
 
-      <div id={resultsId} aria-live="polite" className="mt-5 min-h-24">
+      <div id={resultsId} aria-live="polite" className="mt-5 min-h-12">
         {hasQuery && results.length > 0 ? (
           <>
             <p className="mb-3 eyebrow">Te puede ayudar</p>

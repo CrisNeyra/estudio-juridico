@@ -29,9 +29,12 @@ export function TurnstileWidget() {
   const reactId = useId();
   const containerId = `cf-turnstile-${reactId.replace(/:/g, "")}`;
   const [error, setError] = useState<string | null>(null);
+  const localHost =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
   useEffect(() => {
-    if (!siteKey) return;
+    if (!siteKey || localHost) return;
 
     let widgetId: string | undefined;
 
@@ -71,9 +74,9 @@ export function TurnstileWidget() {
         }
       }
     };
-  }, [containerId]);
+  }, [containerId, localHost]);
 
-  if (!siteKey) return null;
+  if (!siteKey || localHost) return null;
 
   return (
     <div className="space-y-2">

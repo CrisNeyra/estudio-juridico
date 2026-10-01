@@ -6,7 +6,7 @@ export async function verifyTurnstile(
   token: FormDataEntryValue | null,
   ip?: string,
 ): Promise<boolean> {
-  if (!features.turnstile) return true;
+  if (!features.turnstile || env.NODE_ENV !== "production") return true;
   if (typeof token !== "string" || token.length === 0) return false;
 
   const body = new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY!, response: token });

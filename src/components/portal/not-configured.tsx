@@ -7,10 +7,12 @@ export function NotConfigured() {
         El portal de clientes todavía no está habilitado. Mientras tanto, podés consultar el estado
         de tu caso escribiéndonos o llamando al estudio.
       </p>
-      <p className="mt-6 text-sm text-muted-foreground">
-        Administradores: configurá las variables <code>NEXT_PUBLIC_SUPABASE_URL</code> y{" "}
-        <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> (ver README).
-      </p>
+      {process.env.NODE_ENV !== "production" ? (
+        <p className="mt-6 text-sm text-muted-foreground">
+          En local: copiá <code>.env.example</code> a <code>.env.local</code> y cargá{" "}
+          <code>NEXT_PUBLIC_SUPABASE_URL</code> y <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.
+        </p>
+      ) : null}
     </div>
   );
 }

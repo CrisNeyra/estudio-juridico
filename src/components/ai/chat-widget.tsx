@@ -31,6 +31,17 @@ function RichText({ text }: { text: string }) {
   );
 }
 
+function friendlyChatError(message?: string) {
+  if (!message) return "No pude responder ahora.";
+  try {
+    const parsed = JSON.parse(message) as { error?: string };
+    if (parsed.error) return parsed.error;
+  } catch {
+    /* not JSON */
+  }
+  return message;
+}
+
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -198,7 +209,7 @@ export function ChatWidget() {
 
               {error ? (
                 <p role="alert" className="text-sm text-destructive">
-                  {error.message || "No pude responder ahora."} Podés{" "}
+                  {friendlyChatError(error.message)} Podés{" "}
                   <a
                     href={`https://wa.me/${site.contact.whatsapp}`}
                     className="link-underline"

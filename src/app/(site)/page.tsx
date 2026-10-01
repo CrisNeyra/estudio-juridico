@@ -16,13 +16,12 @@ export default function HomePage() {
     <>
       <JsonLd data={legalServiceJsonLd()} />
 
-      <section className="relative flex min-h-[calc(100dvh-5rem)] flex-col justify-center overflow-hidden">
+      <section className="relative flex min-h-[calc(100dvh-5rem)] flex-col overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
           <HeroVideo />
-          {/* Velo blanco: /70 ≈ 10% menos que el /80 anterior */}
-          <div className="absolute inset-0 bg-white/55" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/25 to-white/40" />
         </div>
-        <div className="container-page pt-8 pb-10 md:pt-10 md:pb-14">
+        <div className="container-page flex min-h-[calc(100dvh-5rem)] flex-col justify-between pt-8 pb-8 md:pt-10 md:pb-10">
           <div className="rise">
             <p className="eyebrow">{site.tagline} — CABA y Provincia de Buenos Aires</p>
             <h1 className="mt-4 display text-[clamp(2rem,5.2vw,4.5rem)]">
@@ -32,7 +31,7 @@ export default function HomePage() {
             </h1>
           </div>
 
-          <div className="mt-8 grid gap-8 md:mt-10 md:grid-cols-12">
+          <div className="mt-auto grid items-end gap-8 pt-10 md:grid-cols-12">
             <div className="rise [animation-delay:100ms] md:col-span-7">
               <ServiceFinder />
             </div>
