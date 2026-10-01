@@ -21,8 +21,8 @@ export default function HomePage() {
           <HeroVideo />
           <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/25 to-white/40" />
         </div>
-        <div className="container-page flex min-h-[calc(100dvh-5rem)] flex-col justify-between pt-8 pb-8 md:pt-10 md:pb-10">
-          <div className="rise">
+        <div className="container-page flex min-h-[calc(100dvh-5rem)] flex-col justify-between pt-16 pb-28 md:pt-24 md:pb-16 lg:pt-28">
+          <div className="max-w-4xl rise">
             <p className="eyebrow">{site.tagline} — CABA y Provincia de Buenos Aires</p>
             <h1 className="mt-4 display text-[clamp(2rem,5.2vw,4.5rem)]">
               Tu tranquilidad,
@@ -35,7 +35,7 @@ export default function HomePage() {
             <div className="rise [animation-delay:100ms] md:col-span-7">
               <ServiceFinder />
             </div>
-            <div className="rise [animation-delay:200ms] md:col-span-4 md:col-start-9">
+            <div className="max-w-sm rise [animation-delay:200ms] md:col-span-4 md:col-start-8 md:max-w-none md:pr-24 lg:pr-28">
               <p className="text-lg text-muted-foreground">
                 Asesoramiento jurídico integral, acompañamiento profesional y defensa de{" "}
                 <strong className="font-semibold text-foreground">tus derechos</strong>.
