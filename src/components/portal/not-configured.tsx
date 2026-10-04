@@ -9,8 +9,8 @@ export function NotConfigured() {
       </p>
       {process.env.NODE_ENV !== "production" ? (
         <p className="mt-6 text-sm text-muted-foreground">
-          En local: copiá <code>.env.example</code> a <code>.env.local</code> y cargá{" "}
-          <code>NEXT_PUBLIC_SUPABASE_URL</code> y <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.
+          En local: configurá <code>DATABASE_URL</code> y <code>AUTH_SECRET</code> (ver{" "}
+          <code>docs/runbooks/neon-setup.md</code>).
         </p>
       ) : null}
     </div>

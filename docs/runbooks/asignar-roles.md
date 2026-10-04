@@ -1,22 +1,36 @@
 # Runbook — Invitar clientes y asignar roles
 
-Los roles (`cliente`, `abogado`, `admin`) **no se pueden cambiar desde la app**: la base lo bloquea a propósito. Se
-asignan desde el dashboard de Supabase.
+Los roles (`cliente`, `abogado`, `admin`) se asignan en la base (Neon). El alta
+de usuarios se hace desde el panel del estudio (`/admin`), no hay registro
+público.
+
+---
+
+**PASO 0 — Primer admin (base vacía)**
+
+Sin un admin previo no podés usar `/admin` para invitar. Creá el primero con el
+script (necesita `DATABASE_URL` en `.env.local`):
+
+```bat
+cmd.exe /c "set SEED_ADMIN_EMAIL=tu@gmail.com&& set SEED_ADMIN_PASSWORD=TuPasswordSegura123&& set SEED_ADMIN_NAME=Admin&& npm run db:seed-admin"
+```
+
+Luego: `/portal/login` → `/portal/seguridad` (activar MFA) → `/admin`.
 
 ---
 
 **PASO 1 — Invitar a la persona**
 
-- Ubicación: Supabase → **Authentication** → **Users** → **Add user** → **Send invitation**
-- Acción: ingresá el email del cliente o integrante del equipo.
-- Verificación: el usuario aparece en la lista como "Waiting for verification". Recibe un email para entrar.
+- Ubicación: el sitio → `/admin` (con sesión staff + MFA) → **Invitar usuario**
+- Acción: email, nombre y rol inicial (`cliente` / `abogado` / `admin`). Opcional:
+  contraseña temporal; si no, Auth.js puede enviar magic link (Gmail SMTP).
+- Verificación: la persona aparece en Neon (`users` + `profiles`) y puede entrar
+  en `/portal/login`.
 
-Todo usuario nuevo arranca como `cliente` (lo crea el trigger `handle_new_user`).
+**PASO 2 — Cambiar rol (solo si hace falta)**
 
-**PASO 2 — Elevar a abogado o admin (solo equipo del estudio)**
-
-- Ubicación: Supabase → **SQL Editor** → **New query**
-- Acción: ejecutá, reemplazando el email y el rol:
+- Ubicación: Neon → **SQL Editor** (o cualquier cliente Postgres con `DATABASE_URL`)
+- Acción:
 
   ```sql
   update public.profiles set role = 'abogado' where email = 'persona@estudio.com.ar';
@@ -27,8 +41,10 @@ Todo usuario nuevo arranca como `cliente` (lo crea el trigger `handle_new_user`)
 **PASO 3 — Activar MFA (obligatorio para abogados y admins)**
 
 - Ubicación: el sitio → **Clientes** → ingresar → **Seguridad** (`/portal/seguridad`)
-- Acción: tocá **Activar**, escaneá el QR con Google Authenticator, 1Password o Authy e ingresá el código de 6 dígitos.
-- Verificación: al entrar a `/admin` se ve el **Panel del estudio**. Sin MFA, `/admin` redirige a Seguridad.
+- Acción: **Activar**, escanear el QR (Google Authenticator, 1Password, Authy) e
+  ingresar el código de 6 dígitos.
+- Verificación: `/admin` muestra el **Panel del estudio**. Sin MFA, redirige a
+  Seguridad o al desafío TOTP.
 
 **PASO 4 — Abrir un caso para un cliente**
 
@@ -39,5 +55,6 @@ Todo usuario nuevo arranca como `cliente` (lo crea el trigger `handle_new_user`)
 ## Quitar acceso
 
 - Rol: `update public.profiles set role = 'cliente' where email = '...';`
-- Acceso total: Supabase → **Authentication** → **Users** → menú del usuario → **Ban user** o **Delete user**.
-  Borrar un usuario con casos está bloqueado (`on delete restrict`) para no perder expedientes.
+- Acceso total: borrar o deshabilitar el usuario en Neon (`users` / `profiles`).
+  Borrar un usuario con casos puede estar restringido por FK; preferí bajar el
+  rol y cambiar la contraseña / invalidar sesiones.

@@ -85,10 +85,10 @@ export default function PrivacyPage() {
       </p>
       <ul>
         <li>Vercel: hosting del sitio y métricas de uso/rendimiento.</li>
-        <li>Resend: envío de correos transaccionales (consultas y avisos de turnos).</li>
+        <li>Gmail / Resend: envío de correos transaccionales (consultas y avisos de turnos).</li>
         <li>
-          Supabase: base de datos, autenticación y almacenamiento de documentos del portal (proyecto
-          en la región de São Paulo).
+          Neon: base de datos del portal y turnos. Autenticación con Auth.js en este sitio.
+          Documentos del portal en Vercel Blob (acceso solo autenticado).
         </li>
         <li>Cloudflare Turnstile: verificación anti-bots en formularios.</li>
         <li>Google Gemini: generación de respuestas del asistente virtual, cuando está activo.</li>

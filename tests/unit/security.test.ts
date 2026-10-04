@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { safeNext } from "@/lib/auth";
+import { safeNext } from "@/lib/safe-next";
 import { sanitizeFileName } from "@/lib/portal";
 import { __test } from "@/lib/rate-limit";
 import { serializeJsonLd } from "@/lib/seo";

@@ -1,42 +1,32 @@
 import Link from "next/link";
+import { asc, desc, gte } from "drizzle-orm";
 import { NotConfigured } from "@/components/portal/not-configured";
-import { CreateCaseForm } from "@/components/portal/admin-forms";
+import { CreateCaseForm, InviteUserForm } from "@/components/portal/admin-forms";
 import { getService } from "@/content/services";
 import { getAuthContext, requireStaff } from "@/lib/auth";
-import {
-  appointmentStatusLabel,
-  caseStatusLabel,
-  formatDateTime,
-  formatDay,
-  type AppointmentRow,
-  type CaseRow,
-} from "@/lib/portal";
+import { getDb, schema } from "@/lib/db";
+import { appointmentStatusLabel, caseStatusLabel, formatDateTime, formatDay } from "@/lib/portal";
 import { updateAppointmentStatus } from "./actions";
 
 function hoursAgo(hours: number) {
-  return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+  return new Date(Date.now() - hours * 60 * 60 * 1000);
 }
 
 export default async function AdminPage() {
   const ctx = await getAuthContext();
   if (!ctx.configured) return <NotConfigured />;
-  const { supabase } = await requireStaff();
+  await requireStaff();
+  const db = getDb()!;
 
   const since = hoursAgo(24);
-  const [{ data: appointments }, { data: cases }] = await Promise.all([
-    supabase
-      .from("appointments")
-      .select("id, name, email, phone, area, starts_at, mode, notes, status")
-      .gte("starts_at", since)
-      .order("starts_at")
-      .limit(50)
-      .returns<AppointmentRow[]>(),
-    supabase
-      .from("cases")
-      .select("id, title, area, reference, status, updated_at, client_id")
-      .order("updated_at", { ascending: false })
-      .limit(50)
-      .returns<CaseRow[]>(),
+  const [appointments, cases] = await Promise.all([
+    db
+      .select()
+      .from(schema.appointments)
+      .where(gte(schema.appointments.startsAt, since))
+      .orderBy(asc(schema.appointments.startsAt))
+      .limit(50),
+    db.select().from(schema.cases).orderBy(desc(schema.cases.updatedAt)).limit(50),
   ]);
 
   return (
@@ -50,7 +40,7 @@ export default async function AdminPage() {
         <h2 id="turnos" className="display text-3xl md:text-4xl">
           Próximos turnos
         </h2>
-        {!appointments || appointments.length === 0 ? (
+        {appointments.length === 0 ? (
           <p className="mt-6 text-muted-foreground">No hay turnos próximos.</p>
         ) : (
           <div className="mt-8 overflow-x-auto">
@@ -78,7 +68,7 @@ export default async function AdminPage() {
                 {appointments.map((a) => (
                   <tr key={a.id} className="border-b border-border align-top">
                     <td className="py-4 pr-4">
-                      {formatDateTime(a.starts_at)}
+                      {formatDateTime(a.startsAt.toISOString())}
                       <span className="block text-xs text-muted-foreground">{a.mode}</span>
                     </td>
                     <td className="py-4 pr-4">
@@ -89,11 +79,6 @@ export default async function AdminPage() {
                         </a>{" "}
                         · {a.phone}
                       </span>
-                      {a.notes ? (
-                        <span className="mt-1 block text-xs text-muted-foreground">
-                          “{a.notes}”
-                        </span>
-                      ) : null}
                     </td>
                     <td className="py-4 pr-4">{getService(a.area)?.title ?? a.area}</td>
                     <td className="py-4 pr-4">{appointmentStatusLabel[a.status]}</td>
@@ -134,7 +119,7 @@ export default async function AdminPage() {
         <h2 id="casos" className="display text-3xl md:text-4xl">
           Casos
         </h2>
-        {!cases || cases.length === 0 ? (
+        {cases.length === 0 ? (
           <p className="mt-6 text-muted-foreground">Todavía no hay casos.</p>
         ) : (
           <ul className="mt-8 border-t border-border">
@@ -149,13 +134,20 @@ export default async function AdminPage() {
                   </span>
                   <span className="text-sm text-muted-foreground">
                     {getService(c.area)?.title ?? c.area} · {caseStatusLabel[c.status]} ·{" "}
-                    {formatDay(c.updated_at)}
+                    {formatDay(c.updatedAt.toISOString())}
                   </span>
                 </Link>
               </li>
             ))}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="invitar">
+        <h2 id="invitar" className="mb-8 display text-3xl md:text-4xl">
+          Invitar usuario
+        </h2>
+        <InviteUserForm />
       </section>
 
       <section aria-labelledby="nuevo">

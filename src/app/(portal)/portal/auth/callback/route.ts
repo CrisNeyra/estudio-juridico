@@ -1,16 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { safeNext } from "@/lib/auth";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
-  const code = searchParams.get("code");
-  const next = safeNext(searchParams.get("next"));
-
-  const supabase = await createSupabaseServerClient();
-  if (supabase && code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(next, origin));
-  }
-  return NextResponse.redirect(new URL("/portal/login?error=link", origin));
+/** Auth.js handles the callback at /api/auth/callback/* — keep this for old links. */
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const next = url.searchParams.get("next") ?? "/portal";
+  return NextResponse.redirect(new URL(`/portal/login?next=${encodeURIComponent(next)}`, url));
 }

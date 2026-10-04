@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
 /**
  * CSP without nonces so pages stay statically generated (see docs/adr/0005-seguridad.md).
@@ -13,7 +12,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  `connect-src 'self' https://challenges.cloudflare.com https://vitals.vercel-insights.com ${supabaseUrl} ${supabaseUrl.replace("https://", "wss://")}`.trim(),
+  "connect-src 'self' https://challenges.cloudflare.com https://vitals.vercel-insights.com https://*.public.blob.vercel-storage.com",
   "frame-src https://challenges.cloudflare.com",
   "object-src 'none'",
   "base-uri 'self'",

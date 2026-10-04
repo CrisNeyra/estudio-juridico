@@ -5,14 +5,14 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import {
   addCaseEvent,
   createCase,
-  registerDocument,
+  inviteUser,
+  uploadDocument,
   type AdminState,
 } from "@/app/(portal)/admin/actions";
 import { Field, inputClass } from "@/components/forms/field";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { services } from "@/content/services";
-import { ALLOWED_DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, sanitizeFileName } from "@/lib/portal";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { ALLOWED_DOCUMENT_TYPES, MAX_DOCUMENT_BYTES } from "@/lib/portal";
 
 const initial: AdminState = { status: "idle" };
 
@@ -78,6 +78,44 @@ export function CreateCaseForm() {
   );
 }
 
+export function InviteUserForm() {
+  const [state, action] = useActionState(inviteUser, initial);
+  const ref = useResetOnSuccess(state);
+  return (
+    <form ref={ref} action={action} className="grid max-w-2xl gap-8 md:grid-cols-2">
+      <div className="md:col-span-2">
+        <Status state={state} />
+      </div>
+      <Field id="fullName" label="Nombre y apellido">
+        <input id="fullName" name="fullName" required minLength={2} className={inputClass} />
+      </Field>
+      <Field id="invite-email" label="Email">
+        <input id="invite-email" name="email" type="email" required className={inputClass} />
+      </Field>
+      <Field id="invite-password" label="Contraseña temporal">
+        <input
+          id="invite-password"
+          name="password"
+          type="password"
+          required
+          minLength={8}
+          className={inputClass}
+        />
+      </Field>
+      <Field id="role" label="Rol">
+        <select id="role" name="role" defaultValue="cliente" className={inputClass}>
+          <option value="cliente">Cliente</option>
+          <option value="abogado">Abogado</option>
+          <option value="admin">Admin</option>
+        </select>
+      </Field>
+      <div>
+        <SubmitButton pendingLabel="Invitando…">Invitar</SubmitButton>
+      </div>
+    </form>
+  );
+}
+
 export function AddEventForm({ caseId }: { caseId: string }) {
   const [state, action] = useActionState(addCaseEvent, initial);
   const ref = useResetOnSuccess(state);
@@ -117,44 +155,27 @@ export function UploadDocumentForm({ caseId }: { caseId: string }) {
   const ref = useResetOnSuccess(state);
   const router = useRouter();
 
-  const upload = (file: File) =>
-    start(async () => {
-      if (file.size > MAX_DOCUMENT_BYTES)
-        return setState({ status: "error", message: "El archivo supera los 20 MB." });
-      if (!(ALLOWED_DOCUMENT_TYPES as readonly string[]).includes(file.type)) {
-        return setState({
-          status: "error",
-          message: "Formato no permitido. Usá PDF, imágenes o Word.",
-        });
-      }
-      const supabase = createSupabaseBrowserClient();
-      if (!supabase) return setState({ status: "error", message: "Supabase no está configurado." });
-
-      const path = `${caseId}/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
-      const { error } = await supabase.storage
-        .from("documents")
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (error) return setState({ status: "error", message: "No pudimos subir el archivo." });
-
-      const result = await registerDocument({
-        caseId,
-        path,
-        name: file.name,
-        size: file.size,
-        mimeType: file.type as (typeof ALLOWED_DOCUMENT_TYPES)[number],
-      });
-      setState(result);
-      if (result.status === "success") router.refresh();
-    });
-
   return (
     <form
       ref={ref}
       onSubmit={(e) => {
         e.preventDefault();
-        const file = new FormData(e.currentTarget).get("file");
-        if (file instanceof File && file.size > 0) upload(file);
-        else setState({ status: "error", message: "Elegí un archivo." });
+        const fd = new FormData(e.currentTarget);
+        fd.set("caseId", caseId);
+        const file = fd.get("file");
+        if (!(file instanceof File) || file.size === 0) {
+          setState({ status: "error", message: "Elegí un archivo." });
+          return;
+        }
+        if (file.size > MAX_DOCUMENT_BYTES) {
+          setState({ status: "error", message: "El archivo supera los 20 MB." });
+          return;
+        }
+        start(async () => {
+          const result = await uploadDocument(fd);
+          setState(result);
+          if (result.status === "success") router.refresh();
+        });
       }}
       className="flex flex-col gap-8"
     >

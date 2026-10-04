@@ -1,7 +1,9 @@
 "use server";
 
+import { and, gte, lt, ne } from "drizzle-orm";
 import { getService } from "@/content/services";
 import { site } from "@/content/site";
+import { getDb, schema } from "@/lib/db";
 import { sendMail } from "@/lib/email";
 import { features } from "@/lib/env";
 import { buildIcs } from "@/lib/ics";
@@ -15,28 +17,28 @@ import {
   toStartsAt,
   type Slot,
 } from "@/lib/schedule";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { appointmentSchema, flattenErrors, type FieldErrors } from "@/lib/validation";
 
-// Dev-only fallback when Supabase isn't configured (single process, not persistent).
 const devBooked = new Set<number>();
 
 async function bookedTimes(date: string): Promise<Set<number>> {
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) return devBooked;
+  const db = getDb();
+  if (!db) return devBooked;
 
   const start = toStartsAt(date, "00:00");
   const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
-  const { data, error } = await supabase.rpc("booked_slots", {
-    range_start: start.toISOString(),
-    range_end: end.toISOString(),
-  });
-  if (error) {
-    logger.error("appointments.booked_slots_failed", { error: error.message });
-    throw new Error("booked_slots_failed");
-  }
-  return new Set((data as { starts_at: string }[]).map((r) => new Date(r.starts_at).getTime()));
+  const rows = await db
+    .select({ startsAt: schema.appointments.startsAt })
+    .from(schema.appointments)
+    .where(
+      and(
+        ne(schema.appointments.status, "cancelado"),
+        gte(schema.appointments.startsAt, start),
+        lt(schema.appointments.startsAt, end),
+      ),
+    );
+  return new Set(rows.map((r) => r.startsAt.getTime()));
 }
 
 export async function getSlots(date: string): Promise<{ slots: Slot[]; error?: string }> {
@@ -100,22 +102,37 @@ export async function bookAppointment(
   }
 
   const startsAt = toStartsAt(data.date, data.time);
-  let appointmentId: string = crypto.randomUUID();
+  let appointmentId = crypto.randomUUID();
 
-  const supabase = await createSupabaseServerClient();
-  if (supabase) {
-    const { data: id, error } = await supabase.rpc("book_appointment", {
-      p_name: data.name,
-      p_email: data.email,
-      p_phone: data.phone,
-      p_area: data.area,
-      p_starts_at: startsAt.toISOString(),
-      p_mode: data.mode,
-      p_notes: data.notes,
-    });
-    if (error) {
-      const taken = error.message.includes("slot_taken");
-      if (!taken) logger.error("appointments.book_failed", { error: error.message });
+  const db = getDb();
+  if (db) {
+    if (startsAt.getTime() <= Date.now()) {
+      return {
+        status: "error",
+        message: "Ese horario ya no está disponible. Elegí otro.",
+        fieldErrors: { time: "Horario no disponible." },
+        values,
+      };
+    }
+    try {
+      const [row] = await db
+        .insert(schema.appointments)
+        .values({
+          name: data.name,
+          email: data.email.toLowerCase(),
+          phone: data.phone,
+          area: data.area,
+          startsAt,
+          mode: data.mode,
+          notes: data.notes || "",
+        })
+        .returning({ id: schema.appointments.id });
+      if (!row) throw new Error("appointments.insert_empty");
+      appointmentId = row.id;
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      const taken = msg.includes("appointments_unique_slot") || msg.includes("unique");
+      if (!taken) logger.error("appointments.book_failed", { error: msg });
       return {
         status: "error",
         message: taken
@@ -125,7 +142,6 @@ export async function bookAppointment(
         values,
       };
     }
-    appointmentId = String(id);
   } else {
     if (devBooked.has(startsAt.getTime())) {
       return {
@@ -168,9 +184,7 @@ export async function bookAppointment(
         `Fecha: ${when}`,
         `Modalidad: ${modeLabel}`,
         `Notas: ${data.notes || "-"}`,
-        features.supabase
-          ? `ID: ${appointmentId}`
-          : "(Supabase no configurado: turno no persistido)",
+        features.db ? `ID: ${appointmentId}` : "(Neon no configurado: turno no persistido)",
       ].join("\n"),
     }),
     sendMail({
@@ -188,7 +202,7 @@ export async function bookAppointment(
     }),
   ]);
 
-  if (!toStudio.ok && !features.supabase) {
+  if (!toStudio.ok && !features.db) {
     return {
       status: "error",
       message: "No pudimos registrar el turno. Escribinos por WhatsApp.",
@@ -201,7 +215,7 @@ export async function bookAppointment(
   logger.info("appointments.booked", {
     area: data.area,
     mode: data.mode,
-    persisted: features.supabase,
+    persisted: features.db,
     emailed: delivered,
   });
   return {
@@ -209,8 +223,8 @@ export async function bookAppointment(
     message: delivered
       ? "Te enviamos un email con los detalles. Te confirmamos el turno dentro de las próximas horas hábiles."
       : features.email
-        ? "Registramos el turno. El aviso al estudio se envió; si no llega el mail, revisá spam o el destinatario de prueba de Resend."
-        : "Registramos el turno en este servidor. En local, sin RESEND_API_KEY el correo no se envía (solo se loguea en la consola).",
+        ? "Registramos el turno. El aviso al estudio se envió; si no llega el mail, revisá spam."
+        : "Registramos el turno en este servidor. En local, sin Gmail/Resend el correo no se envía (solo se loguea en la consola).",
     summary: `${area} · ${when} · ${modeLabel}`,
     ics,
   };

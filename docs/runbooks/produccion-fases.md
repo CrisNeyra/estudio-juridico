@@ -57,21 +57,22 @@ Después de cada cambio de variables: **Redeploy** en Vercel.
 
 **PASO 3 — Propagar a otros servicios**
 
-- Ubicación: Resend (From), Supabase (Site URL / Redirect URLs), Turnstile (hostnames)
+- Ubicación: Gmail/Resend (From), Turnstile (hostnames), `NEXT_PUBLIC_SITE_URL`
 - Acción: actualizá con el dominio nuevo.
 - Verificación: contacto, login del portal y captcha siguen funcionando.
 
 ---
 
-## Fase 2 — Resend + Gemini
+## Fase 2 — Email (Gmail SMTP recomendado) + Gemini
 
 Proyecto Vercel correcto: **estudiosardoflorencia** (no uses `estudio-juridico`).
 Sitio: https://estudiosardoflorencia.vercel.app
 
-Variables ya cargadas: `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`
-(`onboarding@resend.dev`), `GEMINI_MODEL`, `NEXT_PUBLIC_SITE_URL`.
-Falta cargar (si aún no lo hiciste): `RESEND_API_KEY` y
-`GOOGLE_GENERATIVE_AI_API_KEY`.
+**Email sin dominio:** usá Gmail SMTP (gratis). Guía completa:
+[gmail-smtp.md](gmail-smtp.md).
+
+Variables Gmail: `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `CONTACT_TO_EMAIL`,
+`CONTACT_FROM_EMAIL`. Si están las de Gmail, Resend no es necesario.
 
 ### 2.1 Gemini (asistente)
 
@@ -192,7 +193,7 @@ Las keys de Turnstile pueden figurar en la lista pero estar vacías: hay que
 
 ---
 
-## Fase 4 — Supabase
+## Fase 4 — Neon + Auth.js + Vercel Blob
 
 Proyecto Vercel: **estudiosardoflorencia**  
 Sitio: https://estudiosardoflorencia.vercel.app  
@@ -200,65 +201,31 @@ Portal: https://estudiosardoflorencia.vercel.app/portal/login
 Variables:
 https://vercel.com/crisneyra13-projects/estudiosardoflorencia/settings/environment-variables
 
-Código y migración ya están en el repo. Detalle extra:
-[supabase-setup.md](supabase-setup.md) y [asignar-roles.md](asignar-roles.md).
+Detalle: [neon-setup.md](neon-setup.md) y [asignar-roles.md](asignar-roles.md).
 
-**Importante:** `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-deben ser **Config / Encrypted**, no Secret/Sensitive (igual que Turnstile).
-Si figuran como Secret, el portal muestra «Próximamente».
+**PASO 1 — Proyecto Neon**
 
-**PASO 1 — Proyecto Supabase**
+- Ubicación: https://console.neon.tech → **New project**
+- Acción: nombre `estudio-juridico`, región cercana (ej. São Paulo), copiá
+  `DATABASE_URL`.
+- Verificación: proyecto **Active**.
 
-- Ubicación: https://supabase.com/dashboard → **New project**
-- Acción: nombre `estudio-juridico`, organización la tuya, región
-  **South America (São Paulo)**, contraseña de DB fuerte (guardala).
-- Verificación: proyecto **Healthy**.
+**PASO 2 — Migración**
 
-**PASO 2 — Migración SQL**
+- Ubicación: local, con `DATABASE_URL` en `.env.local`
+- Acción: `npm run db:migrate` (o `npm run db:push`).
+- Verificación: tablas Auth.js + `profiles`, `appointments`, `cases`, etc.
 
-- Ubicación: proyecto → **SQL** → **New** / **SQL Editor** → **New query**
-- Acción: abrí en el repo
-  `supabase/migrations/20260927000000_init.sql`, copiá **todo** el archivo,
-  pegalo y **Run**.
-- Verificación:
-  - **Table Editor**: `profiles`, `appointments`, `cases`, `case_events`,
-    `documents`, `audit_log` (RLS / candado).
-  - **Storage**: bucket `documents` (privado).
+**PASO 3 — Variables en Vercel**
 
-**PASO 3 — Auth**
+- `DATABASE_URL`, `AUTH_SECRET` (mín. 16 chars), `BLOB_READ_WRITE_TOKEN`
+  (Vercel Storage → Blob).
+- Redeploy del proyecto.
+- Verificación: `/portal/login` muestra el formulario (ya no «Próximamente»).
 
-- Ubicación: **Authentication** → **Providers** (Email) y **URL Configuration**;
-  **Authentication** → **MFA**
-- Acción:
-  1. Email: desactivá **Allow new users to sign up**.
-  2. Site URL: `https://estudiosardoflorencia.vercel.app`
-  3. Redirect URLs (agregá ambas):
-     - `https://estudiosardoflorencia.vercel.app/portal/auth/callback`
-     - `http://localhost:3000/portal/auth/callback`
-  4. MFA: **TOTP** habilitado.
-- Verificación: cambios guardados.
+**PASO 4 — Admin del estudio**
 
-**PASO 4 — Claves → Vercel (solo anon)**
-
-- Ubicación Supabase: **Project Settings** → **API Keys** / **API**
-  - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
-  - anon / public → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - **No** uses `service_role`.
-- Ubicación Vercel:
-  https://vercel.com/crisneyra13-projects/estudiosardoflorencia/settings/environment-variables
-- Acción: editá o recreá ambas como **Config** (no Secret), entornos
-  Production y Preview → Save.
-- Redeploy:
-  https://vercel.com/crisneyra13-projects/estudiosardoflorencia/deployments
-  → ⋯ → **Redeploy**.
-- Verificación: https://estudiosardoflorencia.vercel.app/portal/login
-  muestra el formulario de ingreso (ya no «Próximamente»).
-
-**PASO 5 — Admin del estudio**
-
-- Ubicación: Supabase → **Authentication** → **Users** → **Add user**
-  (Invite / Send invitation) con el email de la Dra. o el tuyo de prueba.
-- SQL Editor:
+- Desde `/admin` invitá un usuario, o insertá en Neon y elevá rol:
 
   ```sql
   update public.profiles
@@ -266,8 +233,7 @@ Si figuran como Secret, el portal muestra «Próximamente».
   where email = 'TU-EMAIL@ejemplo.com';
   ```
 
-- Sitio: entrá a `/portal/login` → **Seguridad** (`/portal/seguridad`) →
-  activá MFA (TOTP) → `/admin`.
+- Sitio: `/portal/login` → **Seguridad** → MFA TOTP → `/admin`.
 - Verificación: Panel del estudio; un turno de prueba en `/turnos` aparece
   y se puede confirmar/cancelar.
 
@@ -303,7 +269,7 @@ Código: `src/app/(site)/privacidad/page.tsx`,
 `src/app/(site)/aviso-legal/page.tsx`.
 
 **Qué es:** validar que privacidad + aviso legal digan la verdad sobre el
-producto (formularios, turnos, portal, Gemini, Resend, Supabase, Turnstile,
+producto (formularios, turnos, portal, Gemini, Gmail/Resend, Neon, Turnstile,
 Analytics) bajo Ley 25.326 y ética profesional. No es un deploy técnico.
 
 **PASO 1 — Leer / preparar**

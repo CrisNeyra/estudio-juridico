@@ -1,45 +1,54 @@
 import { FileText } from "lucide-react";
 import Link from "next/link";
+import { and, desc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { getService } from "@/content/services";
-import { requireUser } from "@/lib/auth";
-import {
-  caseStatusLabel,
-  formatBytes,
-  formatDateTime,
-  type CaseEventRow,
-  type CaseRow,
-  type DocumentRow,
-} from "@/lib/portal";
+import { isStaff, requireUser } from "@/lib/auth";
+import { getDb, schema } from "@/lib/db";
+import { caseStatusLabel, formatBytes, formatDateTime } from "@/lib/portal";
 
 export default async function CasePage(props: PageProps<"/portal/casos/[id]">) {
   const { id } = await props.params;
   if (!z.uuid().safeParse(id).success) notFound();
 
-  const { supabase } = await requireUser();
+  const { profile } = await requireUser();
+  const db = getDb()!;
+  const staff = isStaff(profile.role);
 
-  // RLS guarantees a client only sees their own case; staff see all.
-  const { data: kase } = await supabase
-    .from("cases")
-    .select("id, title, area, reference, status, updated_at, client_id")
-    .eq("id", id)
-    .maybeSingle<CaseRow>();
+  const [kase] = await db
+    .select()
+    .from(schema.cases)
+    .where(
+      staff
+        ? eq(schema.cases.id, id)
+        : and(eq(schema.cases.id, id), eq(schema.cases.clientId, profile.id)),
+    )
+    .limit(1);
   if (!kase) notFound();
 
-  const [{ data: events }, { data: documents }] = await Promise.all([
-    supabase
-      .from("case_events")
-      .select("id, title, description, occurred_at")
-      .eq("case_id", id)
-      .order("occurred_at", { ascending: false })
-      .returns<CaseEventRow[]>(),
-    supabase
-      .from("documents")
-      .select("id, name, size_bytes, mime_type, created_at")
-      .eq("case_id", id)
-      .order("created_at", { ascending: false })
-      .returns<DocumentRow[]>(),
+  const [events, documents] = await Promise.all([
+    db
+      .select({
+        id: schema.caseEvents.id,
+        title: schema.caseEvents.title,
+        description: schema.caseEvents.description,
+        occurredAt: schema.caseEvents.occurredAt,
+      })
+      .from(schema.caseEvents)
+      .where(eq(schema.caseEvents.caseId, id))
+      .orderBy(desc(schema.caseEvents.occurredAt)),
+    db
+      .select({
+        id: schema.documents.id,
+        name: schema.documents.name,
+        sizeBytes: schema.documents.sizeBytes,
+        mimeType: schema.documents.mimeType,
+        createdAt: schema.documents.createdAt,
+      })
+      .from(schema.documents)
+      .where(eq(schema.documents.caseId, id))
+      .orderBy(desc(schema.documents.createdAt)),
   ]);
 
   return (
@@ -60,7 +69,7 @@ export default async function CasePage(props: PageProps<"/portal/casos/[id]">) {
           <h2 id="novedades" className="display text-3xl">
             Novedades
           </h2>
-          {!events || events.length === 0 ? (
+          {events.length === 0 ? (
             <p className="mt-6 text-muted-foreground">Aún no hay novedades registradas.</p>
           ) : (
             <ol className="mt-8 space-y-10 border-l border-border pl-8">
@@ -71,10 +80,10 @@ export default async function CasePage(props: PageProps<"/portal/casos/[id]">) {
                     aria-hidden="true"
                   />
                   <time
-                    dateTime={e.occurred_at}
+                    dateTime={e.occurredAt.toISOString()}
                     className="font-mono text-xs text-muted-foreground"
                   >
-                    {formatDateTime(e.occurred_at)}
+                    {formatDateTime(e.occurredAt.toISOString())}
                   </time>
                   <h3 className="mt-2 font-serif text-2xl">{e.title}</h3>
                   {e.description ? (
@@ -92,7 +101,7 @@ export default async function CasePage(props: PageProps<"/portal/casos/[id]">) {
           <h2 id="documentos" className="display text-3xl">
             Documentos
           </h2>
-          {!documents || documents.length === 0 ? (
+          {documents.length === 0 ? (
             <p className="mt-6 text-muted-foreground">No hay documentos compartidos.</p>
           ) : (
             <ul className="mt-8 border-t border-border">
@@ -100,17 +109,13 @@ export default async function CasePage(props: PageProps<"/portal/casos/[id]">) {
                 <li key={d.id} className="border-b border-border">
                   <a
                     href={`/portal/documentos/${d.id}`}
-                    className="group flex items-start gap-3 py-4 hover:text-brand"
+                    className="group flex items-start gap-3 py-4"
                   >
-                    <FileText
-                      className="mt-0.5 size-5 shrink-0"
-                      strokeWidth={1.25}
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0">
-                      <span className="block truncate">{d.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatBytes(d.size_bytes)} · {formatDateTime(d.created_at)}
+                    <FileText className="mt-1 size-5 shrink-0 text-muted-foreground" />
+                    <span>
+                      <span className="block font-medium group-hover:text-brand">{d.name}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {formatBytes(d.sizeBytes)}
                       </span>
                     </span>
                   </a>

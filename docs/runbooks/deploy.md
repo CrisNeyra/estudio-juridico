@@ -17,16 +17,18 @@ Cada push a `main` despliega producción y cada Pull Request genera una preview.
   **Environment Variables**)
 - Acción: cargá como mínimo:
 
-  | Variable                       | Valor                                             |
-  | ------------------------------ | ------------------------------------------------- |
-  | `NEXT_PUBLIC_SITE_URL`         | `https://<tu-proyecto>.vercel.app` (o tu dominio) |
-  | `GOOGLE_GENERATIVE_AI_API_KEY` | clave de https://aistudio.google.com/apikey       |
-  | `RESEND_API_KEY`               | clave de https://resend.com/api-keys              |
-  | `CONTACT_TO_EMAIL`             | email del estudio que recibe las consultas        |
-  | `CONTACT_FROM_EMAIL`           | remitente verificado en Resend                    |
+  | Variable                            | Valor                                             |
+  | ----------------------------------- | ------------------------------------------------- |
+  | `NEXT_PUBLIC_SITE_URL`              | `https://<tu-proyecto>.vercel.app` (o tu dominio) |
+  | `GOOGLE_GENERATIVE_AI_API_KEY`      | clave de https://aistudio.google.com/apikey       |
+  | `GMAIL_USER` / `GMAIL_APP_PASSWORD` | ver [gmail-smtp.md](gmail-smtp.md)                |
+  | `CONTACT_TO_EMAIL`                  | email del estudio que recibe las consultas        |
+  | `DATABASE_URL`                      | Neon connection string                            |
+  | `AUTH_SECRET`                       | secreto Auth.js (`openssl rand -base64 32`)       |
+  | `BLOB_READ_WRITE_TOKEN`             | Vercel Blob                                       |
 
-  Recomendadas: Upstash, Turnstile y Supabase (ver [`.env.example`](../../.env.example) y
-  [supabase-setup.md](supabase-setup.md)).
+  Recomendadas: Upstash y Turnstile (ver [`.env.example`](../../.env.example) y
+  [neon-setup.md](neon-setup.md)).
 
 - Verificación: las variables aparecen listadas. Las que no empiezan con `NEXT_PUBLIC_` nunca llegan al navegador.
 
@@ -40,8 +42,8 @@ Cada push a `main` despliega producción y cada Pull Request genera una preview.
 
 - Ubicación: Project → **Settings** → **Domains** → **Add**
 - Acción: ingresá tu dominio (ej. `estudio.com.ar`) y creá en tu proveedor DNS los registros que indica Vercel.
-- Verificación: el dominio muestra "Valid Configuration" con HTTPS. Actualizá `NEXT_PUBLIC_SITE_URL` y la **Site URL**
-  de Supabase, y hacé **Redeploy**.
+- Verificación: el dominio muestra "Valid Configuration" con HTTPS. Actualizá `NEXT_PUBLIC_SITE_URL` y hacé
+  **Redeploy**.
 
 **PASO 5 — Chequeo post-deploy**
 

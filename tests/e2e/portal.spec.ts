@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// Sin Supabase configurado el portal debe degradar de forma segura: sin errores,
+// Sin Neon/Auth configurado el portal debe degradar de forma segura: sin errores,
 // sin exponer datos y fuera del índice de buscadores.
 test.describe("portal de clientes", () => {
   for (const path of ["/portal", "/portal/login", "/admin"]) {

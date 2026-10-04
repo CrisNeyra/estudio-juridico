@@ -1,12 +1,12 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { AuthError } from "next-auth";
 import { z } from "zod";
-import { site } from "@/content/site";
+import { signIn, signOut as nextSignOut } from "@/auth";
 import { safeNext } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { features } from "@/lib/env";
 
 export type AuthState = { status: "idle" | "error" | "sent"; message?: string };
 
@@ -18,8 +18,7 @@ const credentials = z.object({
 const GENERIC_ERROR = "Email o contraseña incorrectos.";
 
 export async function signInWithPassword(_prev: AuthState, formData: FormData): Promise<AuthState> {
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) return { status: "error", message: "El portal no está configurado." };
+  if (!features.auth) return { status: "error", message: "El portal no está configurado." };
 
   if (!(await rateLimit("auth", `login:${await clientIp()}`)).success) {
     return { status: "error", message: "Demasiados intentos. Esperá unos minutos." };
@@ -31,17 +30,28 @@ export async function signInWithPassword(_prev: AuthState, formData: FormData): 
   });
   if (!parsed.success) return { status: "error", message: GENERIC_ERROR };
 
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) {
-    logger.warn("auth.login_failed", { reason: error.code ?? error.message });
-    return { status: "error", message: GENERIC_ERROR };
+  const next = safeNext(formData.get("next"));
+  try {
+    await signIn("credentials", {
+      email: parsed.data.email.toLowerCase(),
+      password: parsed.data.password,
+      redirectTo: next,
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      logger.warn("auth.login_failed", { reason: error.type });
+      return { status: "error", message: GENERIC_ERROR };
+    }
+    throw error;
   }
-  redirect(safeNext(formData.get("next")));
+  return { status: "idle" };
 }
 
 export async function sendMagicLink(_prev: AuthState, formData: FormData): Promise<AuthState> {
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) return { status: "error", message: "El portal no está configurado." };
+  if (!features.auth) return { status: "error", message: "El portal no está configurado." };
+  if (!features.email) {
+    return { status: "error", message: "El envío de email no está configurado." };
+  }
 
   if (!(await rateLimit("auth", `magic:${await clientIp()}`)).success) {
     return { status: "error", message: "Demasiados intentos. Esperá unos minutos." };
@@ -51,16 +61,18 @@ export async function sendMagicLink(_prev: AuthState, formData: FormData): Promi
   if (!email.success) return { status: "error", message: "Ingresá un email válido." };
 
   const next = safeNext(formData.get("next"));
-  const { error } = await supabase.auth.signInWithOtp({
-    email: email.data,
-    options: {
-      shouldCreateUser: false,
-      emailRedirectTo: `${site.url}/portal/auth/callback?next=${encodeURIComponent(next)}`,
-    },
-  });
-  if (error) logger.warn("auth.magic_link_failed", { reason: error.code ?? error.message });
+  try {
+    await signIn("nodemailer", {
+      email: email.data.toLowerCase(),
+      redirect: false,
+      redirectTo: next,
+    });
+  } catch (error) {
+    logger.warn("auth.magic_link_failed", {
+      reason: error instanceof Error ? error.message : String(error),
+    });
+  }
 
-  // Same response whether the account exists or not (prevents user enumeration).
   return {
     status: "sent",
     message: "Si el email está registrado, te enviamos un enlace de acceso.",
@@ -68,7 +80,5 @@ export async function sendMagicLink(_prev: AuthState, formData: FormData): Promi
 }
 
 export async function signOut() {
-  const supabase = await createSupabaseServerClient();
-  await supabase?.auth.signOut();
-  redirect("/portal/login");
+  await nextSignOut({ redirectTo: "/portal/login" });
 }

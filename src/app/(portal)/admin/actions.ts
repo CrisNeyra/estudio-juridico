@@ -1,12 +1,18 @@
 "use server";
 
+import { put, del } from "@vercel/blob";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { services } from "@/content/services";
 import { requireStaff } from "@/lib/auth";
+import { getDb, schema } from "@/lib/db";
+import { features } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { ALLOWED_DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, sanitizeFileName } from "@/lib/portal";
+import bcrypt from "bcryptjs";
+import { sendMail } from "@/lib/email";
 
 export type AdminState = { status: "idle" | "success" | "error"; message?: string };
 
@@ -18,14 +24,15 @@ const appointmentUpdate = z.object({
 });
 
 export async function updateAppointmentStatus(formData: FormData) {
-  const { supabase } = await requireStaff();
+  await requireStaff();
+  const db = getDb();
+  if (!db) return;
   const parsed = appointmentUpdate.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
-  const { error } = await supabase
-    .from("appointments")
-    .update({ status: parsed.data.status })
-    .eq("id", parsed.data.id);
-  if (error) logger.error("admin.appointment_update_failed", { error: error.message });
+  await db
+    .update(schema.appointments)
+    .set({ status: parsed.data.status })
+    .where(eq(schema.appointments.id, parsed.data.id));
   revalidatePath("/admin");
 }
 
@@ -37,48 +44,54 @@ const newCase = z.object({
 });
 
 export async function createCase(_prev: AdminState, formData: FormData): Promise<AdminState> {
-  const { supabase, user } = await requireStaff();
+  const { user } = await requireStaff();
+  const db = getDb();
+  if (!db) return { status: "error", message: "Base de datos no configurada." };
   const parsed = newCase.safeParse(Object.fromEntries(formData));
   if (!parsed.success)
     return { status: "error", message: parsed.error.issues[0]?.message ?? "Datos inválidos." };
 
-  const { data: client } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("email", parsed.data.clientEmail.toLowerCase())
-    .maybeSingle<{ id: string }>();
+  const [client] = await db
+    .select({ id: schema.profiles.id })
+    .from(schema.profiles)
+    .where(eq(schema.profiles.email, parsed.data.clientEmail.toLowerCase()))
+    .limit(1);
   if (!client) {
     return {
       status: "error",
-      message: "No existe un usuario con ese email. Invitalo primero desde Supabase (ver runbook).",
+      message: "No existe un usuario con ese email. Invitalo primero desde Administración.",
     };
   }
 
-  const { data, error } = await supabase
-    .from("cases")
-    .insert({
-      client_id: client.id,
-      lawyer_id: user.id,
+  const [created] = await db
+    .insert(schema.cases)
+    .values({
+      clientId: client.id,
+      lawyerId: user.id,
       title: parsed.data.title,
       area: parsed.data.area,
       reference: parsed.data.reference || null,
     })
-    .select("id")
-    .single<{ id: string }>();
-  if (error || !data) {
-    logger.error("admin.case_create_failed", { error: error?.message });
+    .returning({ id: schema.cases.id });
+  if (!created) {
+    logger.error("admin.case_create_failed", {});
     return { status: "error", message: "No pudimos crear el caso." };
   }
-  redirect(`/admin/casos/${data.id}`);
+  redirect(`/admin/casos/${created.id}`);
 }
 
 const caseStatus = z.object({ id: z.uuid(), status: z.enum(["abierto", "en_tramite", "cerrado"]) });
 
 export async function updateCaseStatus(formData: FormData) {
-  const { supabase } = await requireStaff();
+  await requireStaff();
+  const db = getDb();
+  if (!db) return;
   const parsed = caseStatus.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
-  await supabase.from("cases").update({ status: parsed.data.status }).eq("id", parsed.data.id);
+  await db
+    .update(schema.cases)
+    .set({ status: parsed.data.status })
+    .where(eq(schema.cases.id, parsed.data.id));
   revalidatePath(`/admin/casos/${parsed.data.id}`);
 }
 
@@ -89,72 +102,140 @@ const newEvent = z.object({
 });
 
 export async function addCaseEvent(_prev: AdminState, formData: FormData): Promise<AdminState> {
-  const { supabase, user } = await requireStaff();
+  const { user } = await requireStaff();
+  const db = getDb();
+  if (!db) return { status: "error", message: "Base de datos no configurada." };
   const parsed = newEvent.safeParse(Object.fromEntries(formData));
   if (!parsed.success)
     return { status: "error", message: parsed.error.issues[0]?.message ?? "Datos inválidos." };
 
-  const { error } = await supabase.from("case_events").insert({
-    case_id: parsed.data.caseId,
-    author_id: user.id,
+  await db.insert(schema.caseEvents).values({
+    caseId: parsed.data.caseId,
+    authorId: user.id,
     title: parsed.data.title,
     description: parsed.data.description,
   });
-  if (error) return { status: "error", message: "No pudimos guardar la novedad." };
-  await supabase
-    .from("cases")
-    .update({ status: "en_tramite" })
-    .eq("id", parsed.data.caseId)
-    .eq("status", "abierto");
+  await db
+    .update(schema.cases)
+    .set({ status: "en_tramite" })
+    .where(and(eq(schema.cases.id, parsed.data.caseId), eq(schema.cases.status, "abierto")));
   revalidatePath(`/admin/casos/${parsed.data.caseId}`);
   return { status: "success", message: "Novedad publicada. El cliente ya puede verla." };
 }
 
-const documentInput = z.object({
-  caseId: z.uuid(),
-  path: z.string().max(300),
-  name: z.string().min(1).max(200),
-  size: z.number().int().positive().max(MAX_DOCUMENT_BYTES),
-  mimeType: z.enum(ALLOWED_DOCUMENT_TYPES),
+const inviteSchema = z.object({
+  email: z.email(),
+  fullName: z.string().trim().min(2).max(120),
+  password: z.string().min(8).max(200),
+  role: z.enum(["cliente", "abogado", "admin"]).default("cliente"),
 });
 
-/**
- * Files are uploaded straight from the browser to Supabase Storage (bucket policy: staff-only
- * insert; bucket limits enforce size/mime). This action then records the metadata, checking
- * the object really exists under the case folder so paths can't be spoofed.
- */
-export async function registerDocument(input: z.input<typeof documentInput>): Promise<AdminState> {
-  const { supabase, user } = await requireStaff();
-  const parsed = documentInput.safeParse(input);
-  if (!parsed.success) return { status: "error", message: "Archivo inválido." };
-  const { caseId, path, name, size, mimeType } = parsed.data;
+/** Invite a client or staff member (creates Auth.js user + profile). */
+export async function inviteUser(_prev: AdminState, formData: FormData): Promise<AdminState> {
+  await requireStaff();
+  const db = getDb();
+  if (!db) return { status: "error", message: "Base de datos no configurada." };
+  const parsed = inviteSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success)
+    return { status: "error", message: parsed.error.issues[0]?.message ?? "Datos inválidos." };
 
-  const prefix = `${caseId}/`;
-  const objectName = path.slice(prefix.length);
-  if (!path.startsWith(prefix) || !/^[0-9a-f-]{36}-[a-zA-Z0-9._-]+$/.test(objectName)) {
-    return { status: "error", message: "Ruta de archivo inválida." };
-  }
+  const email = parsed.data.email.toLowerCase();
+  const [existing] = await db
+    .select({ id: schema.users.id })
+    .from(schema.users)
+    .where(eq(schema.users.email, email))
+    .limit(1);
+  if (existing) return { status: "error", message: "Ya existe un usuario con ese email." };
 
-  const { data: listed } = await supabase.storage
-    .from("documents")
-    .list(caseId, { search: objectName, limit: 1 });
-  if (!listed?.some((o) => o.name === objectName)) {
-    return { status: "error", message: "No encontramos el archivo subido." };
-  }
+  const passwordHash = await bcrypt.hash(parsed.data.password, 12);
+  const [user] = await db
+    .insert(schema.users)
+    .values({
+      email,
+      name: parsed.data.fullName,
+      passwordHash,
+      emailVerified: new Date(),
+    })
+    .returning({ id: schema.users.id });
+  if (!user) return { status: "error", message: "No pudimos crear el usuario." };
 
-  const { error } = await supabase.from("documents").insert({
-    case_id: caseId,
-    uploaded_by: user.id,
-    name: sanitizeFileName(name),
-    storage_path: path,
-    size_bytes: size,
-    mime_type: mimeType,
+  await db.insert(schema.profiles).values({
+    id: user.id,
+    email,
+    fullName: parsed.data.fullName,
+    role: parsed.data.role,
   });
-  if (error) {
-    logger.error("admin.document_register_failed", { error: error.message });
-    await supabase.storage.from("documents").remove([path]);
-    return { status: "error", message: "No pudimos registrar el documento." };
+
+  if (features.email) {
+    await sendMail({
+      to: email,
+      subject: "Acceso al portal de clientes",
+      text: [
+        `Hola ${parsed.data.fullName}:`,
+        "",
+        "Te creamos acceso al portal.",
+        `Email: ${email}`,
+        `Contraseña temporal: ${parsed.data.password}`,
+        "",
+        "Entrá en /portal/login y cambiá la contraseña desde Seguridad.",
+      ].join("\n"),
+    });
   }
+
+  revalidatePath("/admin");
+  return { status: "success", message: "Usuario invitado. Ya puede ingresar al portal." };
+}
+
+export async function uploadDocument(formData: FormData): Promise<AdminState> {
+  const { user } = await requireStaff();
+  const db = getDb();
+  if (!db) return { status: "error", message: "Base de datos no configurada." };
+  if (!features.blob) return { status: "error", message: "Vercel Blob no está configurado." };
+
+  const caseId = String(formData.get("caseId") ?? "");
+  const file = formData.get("file");
+  if (!z.uuid().safeParse(caseId).success) return { status: "error", message: "Caso inválido." };
+  if (!(file instanceof File) || file.size === 0) {
+    return { status: "error", message: "Elegí un archivo." };
+  }
+  if (file.size > MAX_DOCUMENT_BYTES) {
+    return { status: "error", message: "El archivo supera los 20 MB." };
+  }
+  if (!(ALLOWED_DOCUMENT_TYPES as readonly string[]).includes(file.type)) {
+    return { status: "error", message: "Formato no permitido. Usá PDF, imágenes o Word." };
+  }
+
+  const path = `cases/${caseId}/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+  let blobUrl: string | undefined;
+  try {
+    const blob = await put(path, file, {
+      access: "private",
+      contentType: file.type,
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
+    blobUrl = blob.url;
+    await db.insert(schema.documents).values({
+      caseId,
+      uploadedBy: user.id,
+      name: sanitizeFileName(file.name),
+      storagePath: blob.url,
+      sizeBytes: file.size,
+      mimeType: file.type,
+    });
+  } catch (error) {
+    logger.error("admin.document_upload_failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    if (blobUrl) {
+      try {
+        await del(blobUrl, { token: process.env.BLOB_READ_WRITE_TOKEN });
+      } catch {
+        /* ignore */
+      }
+    }
+    return { status: "error", message: "No pudimos subir el documento." };
+  }
+
   revalidatePath(`/admin/casos/${caseId}`);
   return { status: "success", message: "Documento compartido con el cliente." };
 }

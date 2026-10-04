@@ -6,11 +6,11 @@ import { getAuthContext, safeNext } from "@/lib/auth";
 export default async function MfaPage(props: PageProps<"/portal/mfa">) {
   const ctx = await getAuthContext();
   if (!ctx.configured) return <NotConfigured />;
-  if (!ctx.user) redirect("/portal/login");
+  if (!ctx.user || !ctx.profile) redirect("/portal/login");
 
   const { next } = await props.searchParams;
   const target = safeNext(next);
-  if (ctx.aal.current === "aal2" || ctx.aal.next !== "aal2") redirect(target);
+  if (!ctx.profile.totp_enabled || ctx.mfaVerified) redirect(target);
 
   return (
     <div className="max-w-xl">

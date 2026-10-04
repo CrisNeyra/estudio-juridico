@@ -18,7 +18,7 @@ Repositorio: [github.com/CrisNeyra/estudio-juridico](https://github.com/CrisNeyr
 | Novedades  | `/blog`                            | Artículos en MDX                                                         |
 | Contacto   | `/contacto`                        | Formulario con validación en el servidor                                 |
 | Turnos     | `/turnos`                          | Agenda de lunes a viernes, confirmación por email e `.ics`               |
-| Portal     | `/portal`, `/admin`                | Casos y documentos. Sin Supabase muestra “Próximamente”                  |
+| Portal     | `/portal`, `/admin`                | Casos y documentos. Sin Neon/Auth muestra “Próximamente”                 |
 | Asistente  | botón flotante                     | Orientación general, sin asesoramiento legal                             |
 | WhatsApp   | botón bajo el asistente            | Abre `wa.me/5491166602795`                                               |
 
@@ -36,16 +36,16 @@ Tipografía: Instrument Serif en títulos y Geist en el texto. El movimiento de 
 
 ## Stack
 
-| Capa           | Tecnología                                                 |
-| -------------- | ---------------------------------------------------------- |
-| Framework      | Next.js 16 (App Router, Server Actions), React 19          |
-| Lenguaje       | TypeScript estricto                                        |
-| UI             | Tailwind CSS v4, shadcn/ui (Radix), Motion, Lenis          |
-| IA             | Vercel AI SDK + Google Gemini                              |
-| Datos y acceso | Supabase (Postgres con RLS, Auth con MFA, Storage privado) |
-| Servicios      | Resend (email), Upstash (rate limit), Cloudflare Turnstile |
-| Calidad        | Vitest, Playwright + axe, Lighthouse CI, ESLint, Prettier  |
-| Deploy         | Vercel                                                     |
+| Capa           | Tecnología                                                |
+| -------------- | --------------------------------------------------------- |
+| Framework      | Next.js 16 (App Router, Server Actions), React 19         |
+| Lenguaje       | TypeScript estricto                                       |
+| UI             | Tailwind CSS v4, shadcn/ui (Radix), Motion, Lenis         |
+| IA             | Vercel AI SDK + Google Gemini                             |
+| Datos y acceso | Neon (Postgres) + Auth.js + Vercel Blob + MFA TOTP        |
+| Servicios      | Gmail SMTP / Resend, Upstash, Cloudflare Turnstile        |
+| Calidad        | Vitest, Playwright + axe, Lighthouse CI, ESLint, Prettier |
+| Deploy         | Vercel                                                    |
 
 Las decisiones de arquitectura están en [`docs/adr/`](docs/adr). La paleta y la ausencia de modo oscuro de esta versión reemplazan la dirección visual descrita en el ADR 0004.
 
@@ -138,25 +138,26 @@ Las palabras clave de cada área alimentan el buscador y las sugerencias del asi
 
 ## Variables de entorno
 
-Todas son opcionales en desarrollo. En producción, email y Supabase dejan de ser opcionales si se quieren recibir consultas y usar el portal.
+Todas son opcionales en desarrollo. En producción, email y Neon/Auth dejan de ser opcionales si se quieren recibir consultas y usar el portal.
 
-| Variable                                                    | Para qué                                  |
-| ----------------------------------------------------------- | ----------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`                                      | URL canónica, sitemap y Open Graph        |
-| `GOOGLE_GENERATIVE_AI_API_KEY`, `GEMINI_MODEL`              | Asistente real                            |
-| `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`  | Emails de contacto y turnos               |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`        | Límite de uso compartido entre instancias |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`    | Control anti-bots                         |
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Turnos persistentes y portal              |
+| Variable                                                                     | Para qué                                  |
+| ---------------------------------------------------------------------------- | ----------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`                                                       | URL canónica, sitemap y Open Graph        |
+| `GOOGLE_GENERATIVE_AI_API_KEY`, `GEMINI_MODEL`                               | Asistente real                            |
+| `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` | Emails (Gmail SMTP gratis)                |
+| `RESEND_API_KEY` (opcional)                                                  | Emails vía Resend si no hay Gmail         |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                         | Límite de uso compartido entre instancias |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`                     | Control anti-bots                         |
+| `DATABASE_URL`, `AUTH_SECRET`, `BLOB_READ_WRITE_TOKEN`                       | Turnos, portal y documentos               |
 
-No cargues la clave `service_role` de Supabase en esta app. La clave anónima es pública y queda limitada por las políticas de la base.
+Guía de setup: [docs/runbooks/neon-setup.md](docs/runbooks/neon-setup.md).
 
 ## Seguridad
 
 - Cabeceras y CSP en `next.config.ts`.
 - Formularios validados con Zod en el servidor, con campo trampa, límite de intentos y Turnstile cuando está configurado.
 - El asistente descarta todo lo que no sea texto, limita el tamaño y no debe dar asesoramiento concreto.
-- Portal: políticas por fila, chequeo de rol en cada acción, MFA obligatorio para el equipo, documentos con enlace firmado de 60 segundos y auditoría por triggers.
+- Portal: chequeo de rol en cada acción del servidor, MFA obligatorio para el equipo, documentos vía Blob con descarga autenticada y auditoría.
 
 Detalle en [ADR 0005](docs/adr/0005-seguridad.md).
 
@@ -168,9 +169,9 @@ Guía por fases (PASO / Ubicación / Acción / Verificación):
 Orden resumido:
 
 1. **Dominio y Vercel.** Importar este repositorio y definir `NEXT_PUBLIC_SITE_URL` con el dominio final (con `https`). Guía: [docs/runbooks/deploy.md](docs/runbooks/deploy.md).
-2. **Email (Resend).** Verificar el dominio del remitente y cargar `RESEND_API_KEY`, `CONTACT_TO_EMAIL` y `CONTACT_FROM_EMAIL`. Sin esto, en producción el formulario no envía la consulta.
+2. **Email.** Preferí Gmail SMTP gratis (sin dominio): [docs/runbooks/gmail-smtp.md](docs/runbooks/gmail-smtp.md). Alternativa: Resend con dominio verificado.
 3. **Asistente (Gemini).** Cargar `GOOGLE_GENERATIVE_AI_API_KEY`. Revisar el system prompt con la Dra. antes de abrirlo al público.
-4. **Supabase.** Proyecto en São Paulo, migración `supabase/migrations/20260927000000_init.sql`, Auth sin registro público y MFA para el equipo. Guía: [docs/runbooks/supabase-setup.md](docs/runbooks/supabase-setup.md) y [docs/runbooks/asignar-roles.md](docs/runbooks/asignar-roles.md). Correr `npx supabase test db` antes de cargar datos reales.
+4. **Neon + Auth.js + Blob.** Proyecto Neon, `npm run db:migrate`, `AUTH_SECRET` y Blob token. Sin registro público; MFA TOTP para el equipo. Guía: [docs/runbooks/neon-setup.md](docs/runbooks/neon-setup.md) y [docs/runbooks/asignar-roles.md](docs/runbooks/asignar-roles.md).
 5. **Abuso.** Upstash para el rate limit (en Vercel hay más de una instancia) y Turnstile en los formularios.
 6. **Legales.** Revisar privacidad (Ley 25.326) y aviso legal con la Dra. Hoy son modelos.
 7. **Contenido.** Subir `hero.mp4` y las fotos de `public/images/fondos/`. Confirmar que no queden cifras, direcciones ni redes que el estudio no haya dado.
@@ -189,9 +190,9 @@ src/app/(portal)/      Portal y administración
 src/app/api/chat/      Asistente en streaming
 src/components/        Layout, formularios, IA, secciones
 src/content/           site.ts y services.ts
-src/lib/               Validación, agenda, SEO, auth, Supabase
+src/lib/               Validación, agenda, SEO, auth, db (Drizzle)
 src/proxy.ts           Sesión y protección de /portal y /admin
-supabase/              Migración, seed y tests de RLS
+drizzle/               Migraciones SQL (Neon)
 tests/                 Unitarios y E2E
 docs/                  ADRs y runbooks
 ```

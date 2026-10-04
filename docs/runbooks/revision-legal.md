@@ -6,8 +6,8 @@ Personales), el secreto profesional y el alcance del asesoramiento online.
 
 Páginas en producción:
 
-- https://estudiosardoflorencia.vercel.app/privacidad
-- https://estudiosardoflorencia.vercel.app/aviso-legal
+- [https://estudiosardoflorencia.vercel.app/privacidad](https://estudiosardoflorencia.vercel.app/privacidad)
+- [https://estudiosardoflorencia.vercel.app/aviso-legal](https://estudiosardoflorencia.vercel.app/aviso-legal)
 
 Código:
 
@@ -39,14 +39,14 @@ tráficos grandes** al formulario si los textos aún no están firmados.
 
 ## 2. Mapa de datos del producto (lo que el código hace hoy)
 
-| Canal                  | Datos típicos                                                               | Dónde viven                                                                 | Quién los ve                                    |
-| ---------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------- |
-| Formulario `/contacto` | Nombre, email, teléfono, área, texto de consulta, consentimiento, Turnstile | Email (Resend) → bandeja configurada (`CONTACT_TO`)                         | Quien reciba ese mail                           |
-| Formulario `/turnos`   | Igual + fecha/hora/modalidad                                                | Supabase (`appointments`) + email de aviso                                  | Staff con portal; Resend                        |
-| Asistente (chat)       | Mensajes de la conversación                                                 | Proveedor Gemini (streaming); **no** se guardan como expediente en Supabase | Google (procesamiento); no el panel del estudio |
-| Portal `/portal`       | Cuenta, casos, eventos, documentos                                          | Supabase (RLS) + Storage privado                                            | Cliente dueño + staff (abogado/admin) con MFA   |
-| Analytics              | Métricas de uso/rendimiento                                                 | Vercel Analytics / Speed Insights                                           | Cuenta Vercel del proyecto                      |
-| Anti-abuso             | Token Turnstile / IP en verificación                                        | Cloudflare                                                                  | Cloudflare (verificación)                       |
+| Canal                  | Datos típicos                                                               | Dónde viven                                                             | Quién los ve                                    |
+| ---------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------- |
+| Formulario `/contacto` | Nombre, email, teléfono, área, texto de consulta, consentimiento, Turnstile | Email (Resend) → bandeja configurada (`CONTACT_TO`)                     | Quien reciba ese mail                           |
+| Formulario `/turnos`   | Igual + fecha/hora/modalidad                                                | Neon (`appointments`) + email de aviso                                  | Staff con portal; Gmail/Resend                  |
+| Asistente (chat)       | Mensajes de la conversación                                                 | Proveedor Gemini (streaming); **no** se guardan como expediente en Neon | Google (procesamiento); no el panel del estudio |
+| Portal `/portal`       | Cuenta, casos, eventos, documentos                                          | Neon + Auth.js + Vercel Blob                                            | Cliente dueño + staff (abogado/admin) con MFA   |
+| Analytics              | Métricas de uso/rendimiento                                                 | Vercel Analytics / Speed Insights                                       | Cuenta Vercel del proyecto                      |
+| Anti-abuso             | Token Turnstile / IP en verificación                                        | Cloudflare                                                              | Cloudflare (verificación)                       |
 
 Consentimiento en formularios (texto actual):
 
@@ -80,83 +80,76 @@ Consentimiento en formularios (texto actual):
 
 ### A — Decidir en reunión (bloquean “texto final”)
 
-1. **Responsable y domicilio**  
+1. **Responsable y domicilio**
    ¿El responsable es solo ella? ¿Hay que publicar un domicilio físico / legal
    además de “CABA y PBA”? ¿El email de datos es el mismo que el comercial?
-
-2. **Inscripción AAIP (Registro Nacional de Bases de Datos)**  
+2. **Inscripción AAIP (Registro Nacional de Bases de Datos)**
    La Ley 25.326 exige inscripción de ciertos bancos/archivos privados.  
    Decisión: ¿el estudio ya está inscripto / va a inscribirse / lo evalúa
    aparte? El sitio no reemplaza ese trámite; como máximo puede decir que
    los datos se tratan conforme a la ley y se puede ejercer derechos ante el
    responsable y la AAIP.
-
-3. **Plazos de conservación**  
+3. **Plazos de conservación**
    Hoy no están escritos. Propuestas típicas a validar:
-   - Consultas web no convertidas en cliente: X meses.
-   - Turnos cancelados / no confirmados: Y meses.
-   - Clientes / casos / documentos: mientras dure el vínculo + Z años
-     (archivo profesional / obligaciones legales).
-   - Logs técnicos / analytics: según proveedor.
 
-4. **Transferencias / proveedores nombrados**  
+- Consultas web no convertidas en cliente: X meses.
+- Turnos cancelados / no confirmados: Y meses.
+- Clientes / casos / documentos: mientras dure el vínculo + Z años
+  (archivo profesional / obligaciones legales).
+- Logs técnicos / analytics: según proveedor.
+
+4. **Transferencias / proveedores nombrados**
    Hoy dice “proveedores” sin nombres. Para transparencia conviene listar
    categorías o nombres, con sede/región si ella lo quiere:
 
-   | Proveedor            | Uso                      | Nota                                    |
-   | -------------------- | ------------------------ | --------------------------------------- |
-   | Vercel               | Hosting + Analytics      | EE.UU. / edge global                    |
-   | Resend               | Email transaccional      | Según región del proveedor              |
-   | Supabase             | DB + auth + storage      | Proyecto en **São Paulo**               |
-   | Cloudflare Turnstile | Anti-bots en formularios | Verificación en Cloudflare              |
-   | Google Gemini        | Asistente orientativo    | Procesamiento por Google; no expediente |
+| Proveedor             | Uso                      | Nota                                    |
+| --------------------- | ------------------------ | --------------------------------------- |
+| Vercel                | Hosting + Analytics      | EE.UU. / edge global                    |
+| Resend                | Email transaccional      | Según región del proveedor              |
+| Neon + Auth.js + Blob | DB + auth + documentos   | Neon (región elegida); Blob en Vercel   |
+| Cloudflare Turnstile  | Anti-bots en formularios | Verificación en Cloudflare              |
+| Google Gemini         | Asistente orientativo    | Procesamiento por Google; no expediente |
 
-   Decisión: ¿nombres comerciales en la política o solo categorías
-   (“hosting”, “correo”, “IA”)?
-
-5. **WhatsApp**  
-   Canal activo. Meta trata datos bajo sus términos. ¿Se aclara en
-   privacidad que, si la persona escribe por WhatsApp, aplica también la
-   política de Meta?
-
-6. **Jurisdicción del aviso**  
-   El checklist habla CABA/PBA; el texto actual solo menciona tribunales de
-   CABA. ¿Dejar CABA, o “CABA o PBA según corresponda”?
+Decisión: ¿nombres comerciales en la política o solo categorías
+(“hosting”, “correo”, “IA”)? 5. **WhatsApp**
+Canal activo. Meta trata datos bajo sus términos. ¿Se aclara en
+privacidad que, si la persona escribe por WhatsApp, aplica también la
+política de Meta? 6. **Jurisdicción del aviso**
+El checklist habla CABA/PBA; el texto actual solo menciona tribunales de
+CABA. ¿Dejar CABA, o “CABA o PBA según corresponda”?
 
 ### B — Ajustes de redacción recomendados (si ella aprueba)
 
-7. **Derecho de información (art. 6)** más explícito en `/privacidad`:
-   - carácter obligatorio/voluntario de cada dato;
-   - consecuencias de no facilitarlos (no poder responder / no agendar);
-   - destinatarios (equipo del estudio + proveedores necesarios).
+1. **Derecho de información (art. 6)** más explícito en `/privacidad`:
 
-8. **Datos sensibles**  
+- carácter obligatorio/voluntario de cada dato;
+- consecuencias de no facilitarlos (no poder responder / no agendar);
+- destinatarios (equipo del estudio + proveedores necesarios).
+
+2. **Datos sensibles**
    Reforzar: no pedir DNI, salud, datos de terceros en formularios ni chat;
    si llegan, se tratan con reserva profesional y se pide no reenviarlos por
    canales inseguros.
-
-9. **Menores**  
+3. **Menores**
    Una línea: el sitio no está dirigido a menores; si se detecta, se
    contactará al adulto responsable / no se dará curso.
-
-10. **Portal**  
-    Aclarar: documentos del caso los carga el estudio; acceso con cuenta
-    invitada; staff con MFA; el cliente puede pedir baja/rectificación
-    escribiendo al email de datos.
-
-11. **Analytics**  
-    Confirmar con ella que Vercel Analytics (sin cookies publicitarias) es
-    aceptable sin banner de cookies. Si pide opt-out, hay que implementar
-    cambio técnico aparte.
+4. **Portal**
+   Aclarar: documentos del caso los carga el estudio; acceso con cuenta
+   invitada; staff con MFA; el cliente puede pedir baja/rectificación
+   escribiendo al email de datos.
+5. **Analytics**
+   Confirmar con ella que Vercel Analytics (sin cookies publicitarias) es
+   aceptable sin banner de cookies. Si pide opt-out, hay que implementar
+   cambio técnico aparte.
 
 ### C — Fuera de estas dos páginas (relacionado)
 
-12. TextTextos del checkbox** — ¿el wording actual alcanza o quiere una frase
-    más cercana al art. 6?
-13. **Prompt del chat** — ya prohíbe datos sensibles; ella puede pedir tono
-    más restrictivo.
-14. **Email `CONTACT_TO`** — hoy en pruebas puede ir a un mail técnico; en
-    producción debería ser el del estudio (suele requerir dominio en Resend).
+1. TextTextos del checkbox** — ¿el wording actual alcanza o quiere una frase
+   más cercana al art. 6?
+2. **Prompt del chat** — ya prohíbe datos sensibles; ella puede pedir tono
+   más restrictivo.
+3. **Email `CONTACT_TO`** — hoy en pruebas puede ir a un mail técnico; en
+   producción debería ser el del estudio (suele requerir dominio en Resend).
 
 ---
 
@@ -188,8 +181,8 @@ Asunto sugerido: _Revisión textos web — privacidad y aviso legal_
 
 > Hola Paula,  
 > El sitio ya tiene política de privacidad y aviso legal en  
-> https://estudiosardoflorencia.vercel.app/privacidad y  
-> https://estudiosardoflorencia.vercel.app/aviso-legal
+> [https://estudiosardoflorencia.vercel.app/privacidad](https://estudiosardoflorencia.vercel.app/privacidad) y  
+> [https://estudiosardoflorencia.vercel.app/aviso-legal](https://estudiosardoflorencia.vercel.app/aviso-legal)
 >
 > Necesitamos tu OK (o cambios) sobre: responsable y mail de datos; qué datos  
 > pedimos en contacto/turnos/portal; uso del asistente con Gemini (solo  
@@ -217,7 +210,7 @@ Asunto sugerido: _Revisión textos web — privacidad y aviso legal_
 - Fecha: 29 de septiembre de 2026 (implementación técnica de defaults del runbook)
 - Participantes: equipo técnico (pendiente OK formal de la Dra.)
 - Decisiones (bullet):
-  - Proveedores nombrados (Vercel, Resend, Supabase São Paulo, Turnstile, Gemini)
+  - Proveedores nombrados (Vercel, Gmail/Resend, Neon, Blob, Turnstile, Gemini)
   - Plazos: consultas 12 meses; turnos cancelados 6 meses; clientes mientras dure el vínculo
   - WhatsApp/Meta mencionado; menores y datos sensibles reforzados
   - Jurisdicción CABA o PBA según corresponda
@@ -230,7 +223,7 @@ Asunto sugerido: _Revisión textos web — privacidad y aviso legal_
 
 ## 8. Riesgos si se saltea esta fase
 
-- Describir mal a Gemini/Supabase/Resend → reclamo de falta de información.
+- Describir mal a Gemini/Neon/Resend → reclamo de falta de información.
 - Prometer “no cedemos a terceros” sin aclarar encargados técnicos.
 - Usuario cree que el chat = patrocinio → conflicto ético/profesional.
 - Campañas con formularios sin consentimiento claro o sin política alineada.

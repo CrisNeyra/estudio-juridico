@@ -1,49 +1,39 @@
 import Link from "next/link";
+import { desc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { AddEventForm, UploadDocumentForm } from "@/components/portal/admin-forms";
 import { getService } from "@/content/services";
 import { requireStaff } from "@/lib/auth";
-import {
-  caseStatusLabel,
-  formatBytes,
-  formatDateTime,
-  type CaseEventRow,
-  type CaseRow,
-  type DocumentRow,
-} from "@/lib/portal";
+import { getDb, schema } from "@/lib/db";
+import { caseStatusLabel, formatBytes, formatDateTime } from "@/lib/portal";
 import { updateCaseStatus } from "../../actions";
 
 export default async function AdminCasePage(props: PageProps<"/admin/casos/[id]">) {
   const { id } = await props.params;
   if (!z.uuid().safeParse(id).success) notFound();
-  const { supabase } = await requireStaff();
+  await requireStaff();
+  const db = getDb()!;
 
-  const { data: kase } = await supabase
-    .from("cases")
-    .select("id, title, area, reference, status, updated_at, client_id")
-    .eq("id", id)
-    .maybeSingle<CaseRow>();
+  const [kase] = await db.select().from(schema.cases).where(eq(schema.cases.id, id)).limit(1);
   if (!kase) notFound();
 
-  const [{ data: client }, { data: events }, { data: documents }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("full_name, email")
-      .eq("id", kase.client_id)
-      .maybeSingle<{ full_name: string; email: string }>(),
-    supabase
-      .from("case_events")
-      .select("id, title, description, occurred_at")
-      .eq("case_id", id)
-      .order("occurred_at", { ascending: false })
-      .returns<CaseEventRow[]>(),
-    supabase
-      .from("documents")
-      .select("id, name, size_bytes, mime_type, created_at")
-      .eq("case_id", id)
-      .order("created_at", { ascending: false })
-      .returns<DocumentRow[]>(),
+  const [[client], events, documents] = await Promise.all([
+    db
+      .select({ fullName: schema.profiles.fullName, email: schema.profiles.email })
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, kase.clientId))
+      .limit(1),
+    db
+      .select()
+      .from(schema.caseEvents)
+      .where(eq(schema.caseEvents.caseId, id))
+      .orderBy(desc(schema.caseEvents.occurredAt)),
+    db
+      .select()
+      .from(schema.documents)
+      .where(eq(schema.documents.caseId, id))
+      .orderBy(desc(schema.documents.createdAt)),
   ]);
 
   return (
@@ -58,7 +48,7 @@ export default async function AdminCasePage(props: PageProps<"/admin/casos/[id]"
         </p>
         <h1 className="mt-4 display text-4xl md:text-6xl">{kase.title}</h1>
         <p className="mt-4 text-muted-foreground">
-          Cliente: {client?.full_name || "—"} · {client?.email}
+          Cliente: {client?.fullName || "—"} · {client?.email}
         </p>
         <form action={updateCaseStatus} className="mt-6 flex flex-wrap items-center gap-3 text-sm">
           <input type="hidden" name="id" value={kase.id} />
@@ -104,10 +94,10 @@ export default async function AdminCasePage(props: PageProps<"/admin/casos/[id]"
             Historial
           </h2>
           <ol className="mt-6 space-y-6">
-            {(events ?? []).map((e) => (
+            {events.map((e) => (
               <li key={e.id}>
                 <time className="font-mono text-xs text-muted-foreground">
-                  {formatDateTime(e.occurred_at)}
+                  {formatDateTime(e.occurredAt.toISOString())}
                 </time>
                 <p className="font-serif text-xl">{e.title}</p>
                 {e.description ? (
@@ -123,13 +113,15 @@ export default async function AdminCasePage(props: PageProps<"/admin/casos/[id]"
           <h2 id="docs" className="display text-3xl">
             Documentos
           </h2>
-          <ul className="mt-6 space-y-3 text-sm">
-            {(documents ?? []).map((d) => (
+          <ul className="mt-6 space-y-3">
+            {documents.map((d) => (
               <li key={d.id}>
                 <a href={`/portal/documentos/${d.id}`} className="link-underline">
                   {d.name}
-                </a>{" "}
-                <span className="text-muted-foreground">· {formatBytes(d.size_bytes)}</span>
+                </a>
+                <span className="ml-2 text-sm text-muted-foreground">
+                  {formatBytes(d.sizeBytes)}
+                </span>
               </li>
             ))}
           </ul>
