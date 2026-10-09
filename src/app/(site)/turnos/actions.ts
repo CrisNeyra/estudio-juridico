@@ -4,6 +4,7 @@ import { and, gte, lt, ne } from "drizzle-orm";
 import { getService } from "@/content/services";
 import { site } from "@/content/site";
 import { getDb, schema } from "@/lib/db";
+import { insertAppointment } from "@/lib/domain/appointments";
 import { sendMail } from "@/lib/email";
 import { features } from "@/lib/env";
 import { buildIcs } from "@/lib/ics";
@@ -115,18 +116,15 @@ export async function bookAppointment(
       };
     }
     try {
-      const [row] = await db
-        .insert(schema.appointments)
-        .values({
-          name: data.name,
-          email: data.email.toLowerCase(),
-          phone: data.phone,
-          area: data.area,
-          startsAt,
-          mode: data.mode,
-          notes: data.notes || "",
-        })
-        .returning({ id: schema.appointments.id });
+      const row = await insertAppointment(db, {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        area: data.area,
+        startsAt,
+        mode: data.mode,
+        notes: data.notes || "",
+      });
       if (!row) throw new Error("appointments.insert_empty");
       appointmentId = row.id;
     } catch (error) {

@@ -6,7 +6,8 @@ import { eq } from "drizzle-orm";
 import { cache } from "react";
 import { auth } from "@/auth";
 import { getDb, schema } from "@/lib/db";
-import { features } from "@/lib/env";
+import { env, features } from "@/lib/env";
+import { MFA_COOKIE, MFA_MAX_AGE_SEC, signMfaCookie, verifyMfaCookie } from "@/lib/mfa-cookie";
 import { safeNext } from "@/lib/safe-next";
 
 export { safeNext };
@@ -23,8 +24,9 @@ export type Profile = {
 };
 
 async function mfaCookieMatches(userId: string) {
+  if (!env.AUTH_SECRET) return false;
   const jar = await cookies();
-  return jar.get("mfa_ok")?.value === userId;
+  return verifyMfaCookie(jar.get(MFA_COOKIE)?.value, userId, env.AUTH_SECRET);
 }
 
 /** Loads the verified user, profile and MFA state once per request. */
@@ -67,19 +69,20 @@ export function isStaff(role?: Role | null): boolean {
 }
 
 export async function markMfaVerified(userId: string) {
+  if (!env.AUTH_SECRET) return;
   const jar = await cookies();
-  jar.set("mfa_ok", userId, {
+  jar.set(MFA_COOKIE, signMfaCookie(userId, env.AUTH_SECRET), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 12,
+    maxAge: MFA_MAX_AGE_SEC,
   });
 }
 
 export async function clearMfaVerified() {
   const jar = await cookies();
-  jar.delete("mfa_ok");
+  jar.delete(MFA_COOKIE);
 }
 
 /** Any authenticated user. Users with MFA enrolled must complete the second factor. */
@@ -97,5 +100,11 @@ export async function requireStaff() {
   if (!isStaff(ctx.profile.role)) redirect("/portal");
   if (!ctx.profile.totp_enabled) redirect("/portal/seguridad?mfa=required");
   if (!ctx.mfaVerified) redirect("/portal/mfa");
+  return ctx;
+}
+
+export async function requireAdmin() {
+  const ctx = await requireStaff();
+  if (ctx.profile.role !== "admin") redirect("/admin");
   return ctx;
 }

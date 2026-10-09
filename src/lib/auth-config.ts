@@ -5,6 +5,7 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Nodemailer from "next-auth/providers/nodemailer";
 import { getDb, schema } from "@/lib/db";
+import { credentialsInvalidateJwt } from "@/lib/domain/session";
 import { sendMail } from "@/lib/email";
 import { env, features } from "@/lib/env";
 
@@ -83,31 +84,37 @@ export const authConfig = {
       }
       return true;
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user }) {
       if (user?.id) {
         token.sub = user.id;
         token.mfaVerified = false;
       }
-      if (trigger === "update" && session && typeof session === "object") {
-        if ("mfaVerified" in session) token.mfaVerified = Boolean(session.mfaVerified);
-      }
       if (token.sub) {
         const db = getDb();
         if (db) {
-          const [profile] = await db
+          const [row] = await db
             .select({
               role: schema.profiles.role,
               totpEnabled: schema.profiles.totpEnabled,
               fullName: schema.profiles.fullName,
+              credentialsChangedAt: schema.users.credentialsChangedAt,
             })
             .from(schema.profiles)
+            .innerJoin(schema.users, eq(schema.users.id, schema.profiles.id))
             .where(eq(schema.profiles.id, token.sub))
             .limit(1);
-          if (profile) {
-            token.role = profile.role;
-            token.totpEnabled = profile.totpEnabled;
-            token.name = profile.fullName || token.name;
+          if (!row || credentialsInvalidateJwt(token.iat, row.credentialsChangedAt)) {
+            return {
+              ...token,
+              sub: undefined,
+              role: undefined,
+              totpEnabled: undefined,
+              mfaVerified: false,
+            };
           }
+          token.role = row.role;
+          token.totpEnabled = row.totpEnabled;
+          token.name = row.fullName || token.name;
         }
       }
       return token;

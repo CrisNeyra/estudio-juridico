@@ -3,7 +3,7 @@
 import { AuthError } from "next-auth";
 import { z } from "zod";
 import { signIn, signOut as nextSignOut } from "@/auth";
-import { safeNext } from "@/lib/auth";
+import { clearMfaVerified, safeNext } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { features } from "@/lib/env";
@@ -80,5 +80,6 @@ export async function sendMagicLink(_prev: AuthState, formData: FormData): Promi
 }
 
 export async function signOut() {
+  await clearMfaVerified();
   await nextSignOut({ redirectTo: "/portal/login" });
 }

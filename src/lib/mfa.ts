@@ -11,7 +11,7 @@ export async function startTotpEnrollment(userId: string, email: string) {
   const secret = generateSecret();
   await db
     .update(schema.profiles)
-    .set({ totpSecret: secret, totpEnabled: false })
+    .set({ totpSecret: secret })
     .where(eq(schema.profiles.id, userId));
   const otpauth = generateURI({
     issuer: site.name,

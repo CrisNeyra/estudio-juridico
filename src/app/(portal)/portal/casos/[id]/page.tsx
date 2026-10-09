@@ -1,11 +1,12 @@
 import { FileText } from "lucide-react";
 import Link from "next/link";
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { getService } from "@/content/services";
-import { isStaff, requireUser } from "@/lib/auth";
+import { isStaff, requireStaff, requireUser } from "@/lib/auth";
 import { getDb, schema } from "@/lib/db";
+import { getAccessibleCase } from "@/lib/domain/authz";
 import { caseStatusLabel, formatBytes, formatDateTime } from "@/lib/portal";
 
 export default async function CasePage(props: PageProps<"/portal/casos/[id]">) {
@@ -13,18 +14,10 @@ export default async function CasePage(props: PageProps<"/portal/casos/[id]">) {
   if (!z.uuid().safeParse(id).success) notFound();
 
   const { profile } = await requireUser();
+  if (isStaff(profile.role)) await requireStaff();
   const db = getDb()!;
-  const staff = isStaff(profile.role);
 
-  const [kase] = await db
-    .select()
-    .from(schema.cases)
-    .where(
-      staff
-        ? eq(schema.cases.id, id)
-        : and(eq(schema.cases.id, id), eq(schema.cases.clientId, profile.id)),
-    )
-    .limit(1);
+  const kase = await getAccessibleCase(db, profile, id);
   if (!kase) notFound();
 
   const [events, documents] = await Promise.all([

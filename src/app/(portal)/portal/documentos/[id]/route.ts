@@ -1,9 +1,10 @@
 import { get } from "@vercel/blob";
-import { and, eq } from "drizzle-orm";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getAuthContext, isStaff } from "@/lib/auth";
-import { getDb, schema } from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { canAccessDocument } from "@/lib/domain/authz";
+import { getDocumentForDownload } from "@/lib/domain/documents";
 import { features } from "@/lib/env";
 
 /**
@@ -21,30 +22,24 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/portal/docum
   if (authCtx.profile.totp_enabled && !authCtx.mfaVerified) {
     return NextResponse.redirect(new URL("/portal/mfa", request.url));
   }
+  if (isStaff(authCtx.profile.role)) {
+    if (!authCtx.profile.totp_enabled) {
+      return NextResponse.redirect(new URL("/portal/seguridad?mfa=required", request.url));
+    }
+    if (!authCtx.mfaVerified) {
+      return NextResponse.redirect(new URL("/portal/mfa", request.url));
+    }
+  }
   if (!features.blob) return new NextResponse("Not found", { status: 404 });
 
   const db = getDb();
   if (!db) return new NextResponse("Not found", { status: 404 });
 
-  const [doc] = await db
-    .select({
-      storagePath: schema.documents.storagePath,
-      name: schema.documents.name,
-      caseId: schema.documents.caseId,
-    })
-    .from(schema.documents)
-    .where(eq(schema.documents.id, id))
-    .limit(1);
+  const doc = await getDocumentForDownload(db, id);
   if (!doc) return new NextResponse("Not found", { status: 404 });
 
-  if (!isStaff(authCtx.profile.role)) {
-    const [kase] = await db
-      .select({ id: schema.cases.id })
-      .from(schema.cases)
-      .where(and(eq(schema.cases.id, doc.caseId), eq(schema.cases.clientId, authCtx.profile.id)))
-      .limit(1);
-    if (!kase) return new NextResponse("Not found", { status: 404 });
-  }
+  const allowed = await canAccessDocument(db, authCtx.profile, doc.caseId);
+  if (!allowed) return new NextResponse("Not found", { status: 404 });
 
   const result = await get(doc.storagePath, {
     access: "private",

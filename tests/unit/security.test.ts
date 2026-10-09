@@ -1,8 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { signMfaCookie, verifyMfaCookie } from "@/lib/mfa-cookie";
 import { safeNext } from "@/lib/safe-next";
 import { sanitizeFileName } from "@/lib/portal";
 import { __test } from "@/lib/rate-limit";
 import { serializeJsonLd } from "@/lib/seo";
+import { credentialsInvalidateJwt } from "@/lib/domain/session";
+
+describe("MFA cookie HMAC", () => {
+  const secret = "test-auth-secret-at-least-16";
+  const userId = "11111111-1111-1111-1111-111111111111";
+
+  it("acepta un valor firmado vigente", () => {
+    const token = signMfaCookie(userId, secret, 1_700_000_000_000);
+    expect(verifyMfaCookie(token, userId, secret, 1_700_000_000_000)).toBe(true);
+  });
+
+  it("rechaza el userId crudo (bypass anterior)", () => {
+    expect(verifyMfaCookie(userId, userId, secret)).toBe(false);
+  });
+
+  it("rechaza otro usuario o firma alterada", () => {
+    const token = signMfaCookie(userId, secret);
+    expect(verifyMfaCookie(token, "22222222-2222-2222-2222-222222222222", secret)).toBe(false);
+    expect(verifyMfaCookie(`${token}x`, userId, secret)).toBe(false);
+  });
+
+  it("rechaza un token vencido", () => {
+    const now = 1_700_000_000_000;
+    const token = signMfaCookie(userId, secret, now);
+    expect(verifyMfaCookie(token, userId, secret, now + 13 * 60 * 60 * 1000)).toBe(false);
+  });
+});
 
 describe("safeNext (open redirect)", () => {
   it.each([
@@ -38,6 +66,24 @@ describe("serializeJsonLd", () => {
     const out = serializeJsonLd({ "@type": "Thing", name: "</script><script>alert(1)</script>" });
     expect(out).not.toContain("</script>");
     expect(JSON.parse(out).name).toBe("</script><script>alert(1)</script>");
+  });
+});
+
+describe("credentialsInvalidateJwt", () => {
+  it("invalida un JWT emitido antes del cambio de contraseña", () => {
+    const iat = 1_700_000_000;
+    const changedAt = new Date((iat + 60) * 1000);
+    expect(credentialsInvalidateJwt(iat, changedAt)).toBe(true);
+  });
+
+  it("conserva un JWT posterior al cambio", () => {
+    const iat = 1_700_000_060;
+    const changedAt = new Date(1_700_000_000 * 1000);
+    expect(credentialsInvalidateJwt(iat, changedAt)).toBe(false);
+  });
+
+  it("no invalida si nunca se cambió la contraseña", () => {
+    expect(credentialsInvalidateJwt(1_700_000_000, null)).toBe(false);
   });
 });
 

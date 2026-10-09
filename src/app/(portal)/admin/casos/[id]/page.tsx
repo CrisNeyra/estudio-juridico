@@ -6,16 +6,17 @@ import { AddEventForm, UploadDocumentForm } from "@/components/portal/admin-form
 import { getService } from "@/content/services";
 import { requireStaff } from "@/lib/auth";
 import { getDb, schema } from "@/lib/db";
+import { getAccessibleCase } from "@/lib/domain/authz";
 import { caseStatusLabel, formatBytes, formatDateTime } from "@/lib/portal";
 import { updateCaseStatus } from "../../actions";
 
 export default async function AdminCasePage(props: PageProps<"/admin/casos/[id]">) {
   const { id } = await props.params;
   if (!z.uuid().safeParse(id).success) notFound();
-  await requireStaff();
+  const { profile } = await requireStaff();
   const db = getDb()!;
 
-  const [kase] = await db.select().from(schema.cases).where(eq(schema.cases.id, id)).limit(1);
+  const kase = await getAccessibleCase(db, profile, id);
   if (!kase) notFound();
 
   const [[client], events, documents] = await Promise.all([

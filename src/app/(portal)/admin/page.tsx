@@ -15,7 +15,7 @@ function hoursAgo(hours: number) {
 export default async function AdminPage() {
   const ctx = await getAuthContext();
   if (!ctx.configured) return <NotConfigured />;
-  await requireStaff();
+  const staff = await requireStaff();
   const db = getDb()!;
 
   const since = hoursAgo(24);
@@ -147,7 +147,7 @@ export default async function AdminPage() {
         <h2 id="invitar" className="mb-8 display text-3xl md:text-4xl">
           Invitar usuario
         </h2>
-        <InviteUserForm />
+        <InviteUserForm allowStaffRoles={staff.profile.role === "admin"} />
       </section>
 
       <section aria-labelledby="nuevo">

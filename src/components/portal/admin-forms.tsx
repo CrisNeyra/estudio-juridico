@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import {
   addCaseEvent,
   createCase,
@@ -12,7 +11,7 @@ import {
 import { Field, inputClass } from "@/components/forms/field";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { services } from "@/content/services";
-import { ALLOWED_DOCUMENT_TYPES, MAX_DOCUMENT_BYTES } from "@/lib/portal";
+import { ALLOWED_DOCUMENT_TYPES } from "@/lib/portal";
 
 const initial: AdminState = { status: "idle" };
 
@@ -78,7 +77,7 @@ export function CreateCaseForm() {
   );
 }
 
-export function InviteUserForm() {
+export function InviteUserForm({ allowStaffRoles = false }: { allowStaffRoles?: boolean }) {
   const [state, action] = useActionState(inviteUser, initial);
   const ref = useResetOnSuccess(state);
   return (
@@ -105,8 +104,12 @@ export function InviteUserForm() {
       <Field id="role" label="Rol">
         <select id="role" name="role" defaultValue="cliente" className={inputClass}>
           <option value="cliente">Cliente</option>
-          <option value="abogado">Abogado</option>
-          <option value="admin">Admin</option>
+          {allowStaffRoles ? (
+            <>
+              <option value="abogado">Abogado</option>
+              <option value="admin">Admin</option>
+            </>
+          ) : null}
         </select>
       </Field>
       <div>
@@ -150,36 +153,13 @@ export function AddEventForm({ caseId }: { caseId: string }) {
 }
 
 export function UploadDocumentForm({ caseId }: { caseId: string }) {
-  const [state, setState] = useState<AdminState>(initial);
-  const [pending, start] = useTransition();
+  const [state, action] = useActionState(uploadDocument, initial);
   const ref = useResetOnSuccess(state);
-  const router = useRouter();
 
   return (
-    <form
-      ref={ref}
-      onSubmit={(e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        fd.set("caseId", caseId);
-        const file = fd.get("file");
-        if (!(file instanceof File) || file.size === 0) {
-          setState({ status: "error", message: "Elegí un archivo." });
-          return;
-        }
-        if (file.size > MAX_DOCUMENT_BYTES) {
-          setState({ status: "error", message: "El archivo supera los 20 MB." });
-          return;
-        }
-        start(async () => {
-          const result = await uploadDocument(fd);
-          setState(result);
-          if (result.status === "success") router.refresh();
-        });
-      }}
-      className="flex flex-col gap-8"
-    >
+    <form ref={ref} action={action} className="flex flex-col gap-8">
       <Status state={state} />
+      <input type="hidden" name="caseId" value={caseId} />
       <Field id="file" label="Archivo" hint="PDF, imágenes o Word. Máximo 20 MB.">
         <input
           id="file"
@@ -190,13 +170,9 @@ export function UploadDocumentForm({ caseId }: { caseId: string }) {
           className="mt-3 text-sm"
         />
       </Field>
-      <button
-        type="submit"
-        disabled={pending}
-        className="self-start rounded-full bg-foreground px-8 py-4 text-background disabled:opacity-60"
-      >
-        {pending ? "Subiendo…" : "Compartir documento"}
-      </button>
+      <div>
+        <SubmitButton pendingLabel="Subiendo…">Compartir documento</SubmitButton>
+      </div>
     </form>
   );
 }

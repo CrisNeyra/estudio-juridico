@@ -1,18 +1,18 @@
 "use server";
 
-import { put, del } from "@vercel/blob";
-import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { services } from "@/content/services";
 import { requireStaff } from "@/lib/auth";
 import { getDb, schema } from "@/lib/db";
+import { writeAudit } from "@/lib/domain/audit";
+import { addCaseEventRecord, createCaseRecord } from "@/lib/domain/cases";
+import { uploadCaseDocument } from "@/lib/domain/documents";
+import { invitePortalUser } from "@/lib/domain/users";
 import { features } from "@/lib/env";
 import { logger } from "@/lib/logger";
-import { ALLOWED_DOCUMENT_TYPES, MAX_DOCUMENT_BYTES, sanitizeFileName } from "@/lib/portal";
-import bcrypt from "bcryptjs";
-import { sendMail } from "@/lib/email";
+import { eq } from "drizzle-orm";
 
 export type AdminState = { status: "idle" | "success" | "error"; message?: string };
 
@@ -24,7 +24,7 @@ const appointmentUpdate = z.object({
 });
 
 export async function updateAppointmentStatus(formData: FormData) {
-  await requireStaff();
+  const { user } = await requireStaff();
   const db = getDb();
   if (!db) return;
   const parsed = appointmentUpdate.safeParse(Object.fromEntries(formData));
@@ -33,6 +33,12 @@ export async function updateAppointmentStatus(formData: FormData) {
     .update(schema.appointments)
     .set({ status: parsed.data.status })
     .where(eq(schema.appointments.id, parsed.data.id));
+  await writeAudit(db, {
+    actorId: user.id,
+    action: "appointment.status",
+    tableName: "appointments",
+    recordId: parsed.data.id,
+  });
   revalidatePath("/admin");
 }
 
@@ -63,16 +69,13 @@ export async function createCase(_prev: AdminState, formData: FormData): Promise
     };
   }
 
-  const [created] = await db
-    .insert(schema.cases)
-    .values({
-      clientId: client.id,
-      lawyerId: user.id,
-      title: parsed.data.title,
-      area: parsed.data.area,
-      reference: parsed.data.reference || null,
-    })
-    .returning({ id: schema.cases.id });
+  const created = await createCaseRecord(db, {
+    actorId: user.id,
+    clientId: client.id,
+    title: parsed.data.title,
+    area: parsed.data.area,
+    reference: parsed.data.reference || null,
+  });
   if (!created) {
     logger.error("admin.case_create_failed", {});
     return { status: "error", message: "No pudimos crear el caso." };
@@ -83,7 +86,7 @@ export async function createCase(_prev: AdminState, formData: FormData): Promise
 const caseStatus = z.object({ id: z.uuid(), status: z.enum(["abierto", "en_tramite", "cerrado"]) });
 
 export async function updateCaseStatus(formData: FormData) {
-  await requireStaff();
+  const { user } = await requireStaff();
   const db = getDb();
   if (!db) return;
   const parsed = caseStatus.safeParse(Object.fromEntries(formData));
@@ -92,6 +95,12 @@ export async function updateCaseStatus(formData: FormData) {
     .update(schema.cases)
     .set({ status: parsed.data.status })
     .where(eq(schema.cases.id, parsed.data.id));
+  await writeAudit(db, {
+    actorId: user.id,
+    action: "case.status",
+    tableName: "cases",
+    recordId: parsed.data.id,
+  });
   revalidatePath(`/admin/casos/${parsed.data.id}`);
 }
 
@@ -109,16 +118,19 @@ export async function addCaseEvent(_prev: AdminState, formData: FormData): Promi
   if (!parsed.success)
     return { status: "error", message: parsed.error.issues[0]?.message ?? "Datos inválidos." };
 
-  await db.insert(schema.caseEvents).values({
-    caseId: parsed.data.caseId,
-    authorId: user.id,
-    title: parsed.data.title,
-    description: parsed.data.description,
-  });
-  await db
-    .update(schema.cases)
-    .set({ status: "en_tramite" })
-    .where(and(eq(schema.cases.id, parsed.data.caseId), eq(schema.cases.status, "abierto")));
+  try {
+    await addCaseEventRecord(db, {
+      actorId: user.id,
+      caseId: parsed.data.caseId,
+      title: parsed.data.title,
+      description: parsed.data.description,
+    });
+  } catch (error) {
+    logger.error("admin.case_event_failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { status: "error", message: "No pudimos publicar la novedad." };
+  }
   revalidatePath(`/admin/casos/${parsed.data.caseId}`);
   return { status: "success", message: "Novedad publicada. El cliente ya puede verla." };
 }
@@ -130,63 +142,40 @@ const inviteSchema = z.object({
   role: z.enum(["cliente", "abogado", "admin"]).default("cliente"),
 });
 
-/** Invite a client or staff member (creates Auth.js user + profile). */
 export async function inviteUser(_prev: AdminState, formData: FormData): Promise<AdminState> {
-  await requireStaff();
+  const { user, profile: actor } = await requireStaff();
   const db = getDb();
   if (!db) return { status: "error", message: "Base de datos no configurada." };
   const parsed = inviteSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success)
     return { status: "error", message: parsed.error.issues[0]?.message ?? "Datos inválidos." };
 
-  const email = parsed.data.email.toLowerCase();
-  const [existing] = await db
-    .select({ id: schema.users.id })
-    .from(schema.users)
-    .where(eq(schema.users.email, email))
-    .limit(1);
-  if (existing) return { status: "error", message: "Ya existe un usuario con ese email." };
-
-  const passwordHash = await bcrypt.hash(parsed.data.password, 12);
-  const [user] = await db
-    .insert(schema.users)
-    .values({
-      email,
-      name: parsed.data.fullName,
-      passwordHash,
-      emailVerified: new Date(),
-    })
-    .returning({ id: schema.users.id });
-  if (!user) return { status: "error", message: "No pudimos crear el usuario." };
-
-  await db.insert(schema.profiles).values({
-    id: user.id,
-    email,
-    fullName: parsed.data.fullName,
-    role: parsed.data.role,
-  });
-
-  if (features.email) {
-    await sendMail({
-      to: email,
-      subject: "Acceso al portal de clientes",
-      text: [
-        `Hola ${parsed.data.fullName}:`,
-        "",
-        "Te creamos acceso al portal.",
-        `Email: ${email}`,
-        `Contraseña temporal: ${parsed.data.password}`,
-        "",
-        "Entrá en /portal/login y cambiá la contraseña desde Seguridad.",
-      ].join("\n"),
+  let result: Awaited<ReturnType<typeof invitePortalUser>>;
+  try {
+    result = await invitePortalUser(db, {
+      actorId: user.id,
+      actorRole: actor.role,
+      email: parsed.data.email,
+      fullName: parsed.data.fullName,
+      password: parsed.data.password,
+      role: parsed.data.role,
     });
+  } catch (error) {
+    logger.error("admin.invite_failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { status: "error", message: "No pudimos crear el usuario." };
   }
+  if (!result.ok) return { status: "error", message: result.message };
 
   revalidatePath("/admin");
-  return { status: "success", message: "Usuario invitado. Ya puede ingresar al portal." };
+  return {
+    status: "success",
+    message: "Usuario creado. Comunicá la contraseña por un canal seguro (no se envía por email).",
+  };
 }
 
-export async function uploadDocument(formData: FormData): Promise<AdminState> {
+export async function uploadDocument(_prev: AdminState, formData: FormData): Promise<AdminState> {
   const { user } = await requireStaff();
   const db = getDb();
   if (!db) return { status: "error", message: "Base de datos no configurada." };
@@ -195,44 +184,15 @@ export async function uploadDocument(formData: FormData): Promise<AdminState> {
   const caseId = String(formData.get("caseId") ?? "");
   const file = formData.get("file");
   if (!z.uuid().safeParse(caseId).success) return { status: "error", message: "Caso inválido." };
-  if (!(file instanceof File) || file.size === 0) {
-    return { status: "error", message: "Elegí un archivo." };
-  }
-  if (file.size > MAX_DOCUMENT_BYTES) {
-    return { status: "error", message: "El archivo supera los 20 MB." };
-  }
-  if (!(ALLOWED_DOCUMENT_TYPES as readonly string[]).includes(file.type)) {
-    return { status: "error", message: "Formato no permitido. Usá PDF, imágenes o Word." };
-  }
+  if (!(file instanceof File)) return { status: "error", message: "Elegí un archivo." };
 
-  const path = `cases/${caseId}/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
-  let blobUrl: string | undefined;
   try {
-    const blob = await put(path, file, {
-      access: "private",
-      contentType: file.type,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    });
-    blobUrl = blob.url;
-    await db.insert(schema.documents).values({
-      caseId,
-      uploadedBy: user.id,
-      name: sanitizeFileName(file.name),
-      storagePath: blob.url,
-      sizeBytes: file.size,
-      mimeType: file.type,
-    });
+    const result = await uploadCaseDocument(db, { actorId: user.id, caseId, file });
+    if (!result.ok) return { status: "error", message: result.message };
   } catch (error) {
     logger.error("admin.document_upload_failed", {
       error: error instanceof Error ? error.message : String(error),
     });
-    if (blobUrl) {
-      try {
-        await del(blobUrl, { token: process.env.BLOB_READ_WRITE_TOKEN });
-      } catch {
-        /* ignore */
-      }
-    }
     return { status: "error", message: "No pudimos subir el documento." };
   }
 

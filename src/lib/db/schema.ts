@@ -29,6 +29,10 @@ export const users = pgTable("users", {
   emailVerified: timestamp("email_verified", { mode: "date", withTimezone: true }),
   image: text("image"),
   passwordHash: text("password_hash"),
+  credentialsChangedAt: timestamp("credentials_changed_at", {
+    mode: "date",
+    withTimezone: true,
+  }),
 });
 
 export const accounts = pgTable(
@@ -69,18 +73,22 @@ export const verificationTokens = pgTable(
   (t) => [primaryKey({ columns: [t.identifier, t.token] })],
 );
 
-export const profiles = pgTable("profiles", {
-  id: uuid("id")
-    .primaryKey()
-    .references(() => users.id, { onDelete: "cascade" }),
-  email: text("email").notNull().default(""),
-  fullName: text("full_name").notNull().default(""),
-  phone: text("phone"),
-  role: appRoleEnum("role").notNull().default("cliente"),
-  totpSecret: text("totp_secret"),
-  totpEnabled: boolean("totp_enabled").notNull().default(false),
-  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
-});
+export const profiles = pgTable(
+  "profiles",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .references(() => users.id, { onDelete: "cascade" }),
+    email: text("email").notNull().default(""),
+    fullName: text("full_name").notNull().default(""),
+    phone: text("phone"),
+    role: appRoleEnum("role").notNull().default("cliente"),
+    totpSecret: text("totp_secret"),
+    totpEnabled: boolean("totp_enabled").notNull().default(false),
+    createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("profiles_email_unique").on(t.email)],
+);
 
 export const appointments = pgTable(
   "appointments",

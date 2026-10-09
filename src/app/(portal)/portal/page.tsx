@@ -5,6 +5,7 @@ import { NotConfigured } from "@/components/portal/not-configured";
 import { getService } from "@/content/services";
 import { getAuthContext, requireUser } from "@/lib/auth";
 import { getDb, schema } from "@/lib/db";
+import { linkAppointmentsByEmail } from "@/lib/domain/appointments";
 import { appointmentStatusLabel, caseStatusLabel, formatDateTime, formatDay } from "@/lib/portal";
 
 export default async function PortalHome() {
@@ -13,6 +14,7 @@ export default async function PortalHome() {
 
   const { profile } = await requireUser();
   const db = getDb()!;
+  await linkAppointmentsByEmail(db, profile.id, profile.email);
 
   const [cases, appointments] = await Promise.all([
     db

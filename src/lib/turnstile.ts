@@ -1,12 +1,13 @@
 import "server-only";
 import { env, features } from "@/lib/env";
 
-/** Verifies a Cloudflare Turnstile token. When Turnstile isn't configured it's a no-op. */
+/** Production without Turnstile fails closed. Local/test without keys still skip. */
 export async function verifyTurnstile(
   token: FormDataEntryValue | null,
   ip?: string,
 ): Promise<boolean> {
-  if (!features.turnstile || env.NODE_ENV !== "production") return true;
+  if (env.NODE_ENV === "production" && !features.turnstile) return false;
+  if (!features.turnstile) return true;
   if (typeof token !== "string" || token.length === 0) return false;
 
   const body = new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY!, response: token });

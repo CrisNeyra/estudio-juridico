@@ -13,6 +13,7 @@ export const policies = {
   appointment: { limit: 5, windowSeconds: 60 * 10 },
   chat: { limit: 20, windowSeconds: 60 * 10 },
   auth: { limit: 10, windowSeconds: 60 * 10 },
+  mfa: { limit: 8, windowSeconds: 60 * 10 },
 } satisfies Record<string, Policy>;
 
 type PolicyName = keyof typeof policies;
@@ -62,6 +63,9 @@ export async function rateLimit(name: PolicyName, identifier?: string): Promise<
   if (features.redis) {
     const r = await upstashLimiter(name).limit(id);
     return { success: r.success, remaining: r.remaining, reset: r.reset };
+  }
+  if (env.NODE_ENV === "production") {
+    return { success: false, remaining: 0, reset: Date.now() + 60_000 };
   }
   return memoryLimit(`${name}:${id}`, policies[name]);
 }

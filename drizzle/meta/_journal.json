@@ -8,6 +8,20 @@
       "when": 1728000000000,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1728086400000,
+      "tag": "0001_profiles_email_unique",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1728172800000,
+      "tag": "0002_credentials_changed_at",
+      "breakpoints": true
     }
   ]
 }
