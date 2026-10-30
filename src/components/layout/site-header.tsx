@@ -24,8 +24,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-lg">
       <div className="container-page flex h-16 items-center justify-between gap-6 md:h-20">
-        <Link href="/" aria-label={`${site.name}, inicio`}>
-          <span className="font-serif text-2xl leading-none tracking-tight md:text-3xl">
+        <Link href="/" aria-label={`${site.name}, inicio`} className="min-w-0 shrink">
+          <span className="block truncate font-serif text-2xl leading-none tracking-tight md:text-3xl">
             {site.name}
           </span>
         </Link>
@@ -61,7 +61,7 @@ export function SiteHeader() {
           </Link>
           <Link
             href="/turnos"
-            className="ml-2 hidden rounded-full bg-foreground px-5 py-2.5 text-base text-background transition-colors duration-300 hover:bg-brand hover:text-brand-foreground sm:inline-flex"
+            className="ml-2 inline-flex min-h-11 items-center rounded-full bg-foreground px-3 py-2 text-sm text-background transition-colors duration-300 hover:bg-brand hover:text-brand-foreground sm:px-5 sm:py-2.5 sm:text-base"
           >
             Pedir turno
           </Link>

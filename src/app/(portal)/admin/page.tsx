@@ -43,75 +43,55 @@ export default async function AdminPage() {
         {appointments.length === 0 ? (
           <p className="mt-6 text-muted-foreground">No hay turnos próximos.</p>
         ) : (
-          <div className="mt-8 overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="border-b border-border text-muted-foreground">
-                <tr>
-                  <th scope="col" className="py-3 font-normal">
-                    Fecha
-                  </th>
-                  <th scope="col" className="py-3 font-normal">
-                    Cliente
-                  </th>
-                  <th scope="col" className="py-3 font-normal">
-                    Área
-                  </th>
-                  <th scope="col" className="py-3 font-normal">
-                    Estado
-                  </th>
-                  <th scope="col" className="py-3 font-normal">
-                    <span className="sr-only">Acciones</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {appointments.map((a) => (
-                  <tr key={a.id} className="border-b border-border align-top">
-                    <td className="py-4 pr-4">
-                      {formatDateTime(a.startsAt.toISOString())}
-                      <span className="block text-xs text-muted-foreground">{a.mode}</span>
-                    </td>
-                    <td className="py-4 pr-4">
-                      {a.name}
-                      <span className="block text-xs text-muted-foreground">
-                        <a href={`mailto:${a.email}`} className="hover:text-foreground">
-                          {a.email}
-                        </a>{" "}
-                        · {a.phone}
-                      </span>
-                    </td>
-                    <td className="py-4 pr-4">{getService(a.area)?.title ?? a.area}</td>
-                    <td className="py-4 pr-4">{appointmentStatusLabel[a.status]}</td>
-                    <td className="py-4">
-                      <div className="flex justify-end gap-3">
-                        {a.status !== "confirmado" ? (
-                          <form action={updateAppointmentStatus}>
-                            <input type="hidden" name="id" value={a.id} />
-                            <input type="hidden" name="status" value="confirmado" />
-                            <button type="submit" className="link-underline">
-                              Confirmar
-                            </button>
-                          </form>
-                        ) : null}
-                        {a.status !== "cancelado" ? (
-                          <form action={updateAppointmentStatus}>
-                            <input type="hidden" name="id" value={a.id} />
-                            <input type="hidden" name="status" value="cancelado" />
-                            <button
-                              type="submit"
-                              className="text-muted-foreground hover:text-destructive"
-                            >
-                              Cancelar
-                            </button>
-                          </form>
-                        ) : null}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="mt-8 divide-y divide-border border-y border-border">
+            {appointments.map((a) => (
+              <li
+                key={a.id}
+                className="flex flex-col gap-4 py-6 md:flex-row md:items-center md:justify-between"
+              >
+                <div>
+                  <p className="font-serif text-2xl">{formatDateTime(a.startsAt.toISOString())}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{a.mode}</p>
+                  <p className="mt-3">{a.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    <a href={`mailto:${a.email}`} className="hover:text-foreground">
+                      {a.email}
+                    </a>{" "}
+                    · {a.phone}
+                  </p>
+                  <p className="mt-2 text-sm">
+                    {getService(a.area)?.title ?? a.area} · {appointmentStatusLabel[a.status]}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {a.status !== "confirmado" ? (
+                    <form action={updateAppointmentStatus}>
+                      <input type="hidden" name="id" value={a.id} />
+                      <input type="hidden" name="status" value="confirmado" />
+                      <button
+                        type="submit"
+                        className="inline-flex min-h-11 items-center rounded-full bg-foreground px-5 text-sm text-background"
+                      >
+                        Confirmar
+                      </button>
+                    </form>
+                  ) : null}
+                  {a.status !== "cancelado" ? (
+                    <form action={updateAppointmentStatus}>
+                      <input type="hidden" name="id" value={a.id} />
+                      <input type="hidden" name="status" value="cancelado" />
+                      <button
+                        type="submit"
+                        className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm hover:border-destructive hover:text-destructive"
+                      >
+                        Cancelar
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 

@@ -29,6 +29,22 @@ export default function HomePage() {
               <br />
               respaldada por la <em className="text-violet">mejor defensa legal.</em>
             </h1>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/turnos"
+                className="inline-flex min-h-11 items-center rounded-full bg-foreground px-5 py-2.5 text-base text-background transition-colors duration-300 hover:bg-brand hover:text-brand-foreground"
+              >
+                Pedir turno
+              </Link>
+              <a
+                href={`https://wa.me/${site.contact.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center rounded-full border border-foreground bg-background/80 px-5 py-2.5 text-base backdrop-blur-sm transition-colors hover:border-brand hover:text-brand"
+              >
+                WhatsApp
+              </a>
+            </div>
           </div>
 
           <div className="mt-auto grid items-end gap-8 pt-10 md:grid-cols-12">

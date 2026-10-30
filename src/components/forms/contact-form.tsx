@@ -133,7 +133,7 @@ export function ContactForm({ defaultArea }: { defaultArea?: string }) {
         />
       </Field>
 
-      <div className="flex flex-col gap-6 sm:col-span-2">
+      <div className="flex flex-col gap-6 pb-24 sm:col-span-2 md:pb-0">
         <ConsentCheckbox
           error={e.consent}
           text="Acepto el tratamiento de estos datos para responder mi consulta."

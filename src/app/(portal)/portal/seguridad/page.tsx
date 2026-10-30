@@ -24,11 +24,14 @@ export default async function SecurityPage(props: PageProps<"/portal/seguridad">
       </header>
 
       {mfa === "required" ? (
-        <p role="alert" className="max-w-2xl border-l-2 border-brand pl-4">
-          {staff
-            ? "Para acceder a la administración necesitás activar y verificar la verificación en dos pasos."
-            : "Esta sección requiere verificación en dos pasos."}
-        </p>
+        <div role="alert" className="max-w-2xl border-l-2 border-brand py-2 pl-4">
+          <p className="font-serif text-2xl">Falta un paso</p>
+          <p className="mt-2 text-muted-foreground">
+            {staff
+              ? "Para acceder a la administración necesitás activar y verificar la verificación en dos pasos."
+              : "Esta sección requiere verificación en dos pasos."}
+          </p>
+        </div>
       ) : null}
 
       <section aria-labelledby="mfa">

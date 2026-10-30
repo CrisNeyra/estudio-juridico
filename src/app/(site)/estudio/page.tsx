@@ -1,8 +1,12 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+import Image from "next/image";
+import Link from "next/link";
 import { Reveal } from "@/components/motion/reveal";
 import { CtaBand } from "@/components/sections/cta-band";
 import { PageHeader } from "@/components/sections/page-header";
 import { PageShell } from "@/components/sections/page-shell";
-import { site, stats, values } from "@/content/site";
+import { site, stats, team, values } from "@/content/site";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -10,6 +14,30 @@ export const metadata = pageMetadata({
   description: `Conocé ${site.legalName}: trayectoria, forma de trabajo y compromiso con cada cliente.`,
   path: "/estudio",
 });
+
+function LawyerPortrait() {
+  const member = team[0];
+  const image = member?.image;
+  if (!image?.startsWith("/")) return null;
+  const file = path.join(process.cwd(), "public", image.slice(1));
+  if (!existsSync(file)) return null;
+
+  return (
+    <Link
+      href="/equipo"
+      aria-label={`Ver la ficha de ${member.name}`}
+      className="relative block aspect-[4/5] w-36 overflow-hidden rounded-sm bg-secondary md:col-span-3 md:w-full"
+    >
+      <Image
+        src={image}
+        alt={member.name}
+        fill
+        className="object-cover object-[center_18%]"
+        sizes="(min-width: 768px) 20vw, 9rem"
+      />
+    </Link>
+  );
+}
 
 export default function StudioPage() {
   return (
@@ -26,11 +54,16 @@ export default function StudioPage() {
         lead="Asesoramiento jurídico integral, acompañamiento profesional y defensa de tus derechos, con atención personalizada en CABA y en la Provincia de Buenos Aires."
       />
 
-      <section className="container-page grid gap-12 md:grid-cols-12">
-        <Reveal className="space-y-6 text-lg md:col-span-6 md:col-start-4">
+      <section className="container-page grid items-start gap-10 md:grid-cols-12">
+        <LawyerPortrait />
+        <Reveal className="space-y-6 text-lg md:col-span-7">
           <p>
-            El estudio de la Dra. Paula Florencia Sardo acompaña a personas que necesitan entender
-            su situación y defender sus derechos, con un trato cercano y profesional.
+            El estudio de la{" "}
+            <Link href="/equipo" className="link-underline">
+              Dra. Paula Florencia Sardo
+            </Link>{" "}
+            acompaña a personas que necesitan entender su situación y defender sus derechos, con un
+            trato cercano y profesional.
           </p>
           <p className="text-muted-foreground">
             La práctica abarca derecho laboral, familia, penal, civil y daños, y sucesiones. La

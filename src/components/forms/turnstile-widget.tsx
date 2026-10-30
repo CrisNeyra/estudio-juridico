@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, useSyncExternalStore } from "react";
 
 const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
@@ -24,14 +24,21 @@ declare global {
   }
 }
 
+function subscribeTurnstileHost() {
+  return () => {};
+}
+
+function isLocalHost() {
+  const host = window.location.hostname;
+  return host === "localhost" || host === "127.0.0.1";
+}
+
 /** Renders Cloudflare Turnstile only when a site key is configured. */
 export function TurnstileWidget() {
   const reactId = useId();
   const containerId = `cf-turnstile-${reactId.replace(/:/g, "")}`;
   const [error, setError] = useState<string | null>(null);
-  const localHost =
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  const localHost = useSyncExternalStore(subscribeTurnstileHost, isLocalHost, () => false);
 
   useEffect(() => {
     if (!siteKey || localHost) return;

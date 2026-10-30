@@ -33,6 +33,7 @@ export type TeamMember = {
   areas: string[];
   bio: string;
   registration: string;
+  image?: string;
 };
 
 export const team: TeamMember[] = [
@@ -46,8 +47,9 @@ export const team: TeamMember[] = [
       "Derecho Civil y Daños",
       "Sucesiones",
     ],
-    bio: "Asesoramiento jurídico integral, acompañamiento profesional y defensa de tus derechos, con atención personalizada en la Ciudad Autónoma de Buenos Aires y en la Provincia de Buenos Aires.",
+    bio: "Primero escucha la situación y después explica las opciones con lenguaje claro. Acompaña el caso de punta a punta, con atención personalizada, en CABA y en la Provincia de Buenos Aires.",
     registration: "CPACF T° 152 F° 256 · CAAL T° V F° 69",
+    image: "/images/equipo/paula-sardo.jpeg",
   },
 ];
 

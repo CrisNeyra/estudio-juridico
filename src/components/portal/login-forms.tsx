@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { sendMagicLink, signInWithPassword, type AuthState } from "@/app/(portal)/portal/actions";
-import { Field, inputClass } from "@/components/forms/field";
+import { describedBy, Field, inputClass } from "@/components/forms/field";
 import { SubmitButton } from "@/components/forms/submit-button";
 
 const initial: AuthState = { status: "idle" };
@@ -54,13 +54,14 @@ export function LoginForms({ next }: { next?: string }) {
 
       <form action={mode === "password" ? pwAction : mlAction} className="flex flex-col gap-8">
         <input type="hidden" name="next" value={next ?? ""} />
-        <Field id="email" label="Email">
+        <Field id="email" label="Email" hint="Usá el email con el que te invitó el estudio.">
           <input
             id="email"
             name="email"
             type="email"
             autoComplete="email"
             required
+            aria-describedby={describedBy("email", undefined, "hint")}
             className={inputClass}
           />
         </Field>

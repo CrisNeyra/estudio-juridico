@@ -3,6 +3,7 @@ import Link from "next/link";
 import { and, asc, desc, eq, gte } from "drizzle-orm";
 import { NotConfigured } from "@/components/portal/not-configured";
 import { getService } from "@/content/services";
+import { site } from "@/content/site";
 import { getAuthContext, requireUser } from "@/lib/auth";
 import { getDb, schema } from "@/lib/db";
 import { linkAppointmentsByEmail } from "@/lib/domain/appointments";
@@ -68,9 +69,10 @@ export default async function PortalHome() {
           Mis casos
         </h2>
         {cases.length === 0 ? (
-          <p className="mt-6 text-muted-foreground">
-            Todavía no tenés casos asociados a tu cuenta.
-          </p>
+          <div className="mt-6">
+            <p className="text-muted-foreground">Todavía no tenés casos asociados a tu cuenta.</p>
+            <EmptyActions />
+          </div>
         ) : (
           <ul className="mt-8 border-t border-border">
             {cases.map((c) => (
@@ -103,7 +105,10 @@ export default async function PortalHome() {
           Próximos turnos
         </h2>
         {appointments.length === 0 ? (
-          <p className="mt-6 text-muted-foreground">No tenés turnos próximos.</p>
+          <div className="mt-6">
+            <p className="text-muted-foreground">No tenés turnos próximos.</p>
+            <EmptyActions />
+          </div>
         ) : (
           <ul className="mt-8 space-y-4">
             {appointments.map((a) => (
@@ -119,5 +124,23 @@ export default async function PortalHome() {
         )}
       </section>
     </div>
+  );
+}
+
+function EmptyActions() {
+  return (
+    <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+      <Link href="/turnos" className="link-underline">
+        Pedir un turno
+      </Link>
+      <a
+        href={`https://wa.me/${site.contact.whatsapp}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="link-underline"
+      >
+        Escribinos
+      </a>
+    </p>
   );
 }

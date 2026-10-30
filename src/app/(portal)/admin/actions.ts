@@ -197,5 +197,8 @@ export async function uploadDocument(_prev: AdminState, formData: FormData): Pro
   }
 
   revalidatePath(`/admin/casos/${caseId}`);
-  return { status: "success", message: "Documento compartido con el cliente." };
+  return {
+    status: "success",
+    message: `Compartimos “${file.name}” con el cliente.`,
+  };
 }
