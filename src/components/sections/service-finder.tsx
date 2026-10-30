@@ -24,16 +24,12 @@ export function ServiceFinder() {
           e.preventDefault();
           if (query.trim()) openAssistant(query.trim());
         }}
-        className="flex items-center gap-3 border-b-2 border-foreground/80 pb-3 transition-colors focus-within:border-brand"
+        className="flex items-center gap-3 border-b-2 border-ink/70 pb-3 transition-colors focus-within:border-brand"
       >
         <label htmlFor={inputId} className="sr-only">
           Contanos qué necesitás resolver
         </label>
-        <Search
-          className="size-5 shrink-0 text-muted-foreground"
-          strokeWidth={1.5}
-          aria-hidden="true"
-        />
+        <Search className="size-5 shrink-0 text-ink" strokeWidth={1.5} aria-hidden="true" />
         <input
           id={inputId}
           type="search"
@@ -43,11 +39,11 @@ export function ServiceFinder() {
           autoComplete="off"
           maxLength={300}
           aria-controls={resultsId}
-          className="w-full bg-transparent font-serif text-2xl outline-none placeholder:text-muted-foreground/80 focus-visible:outline-none md:text-3xl"
+          className="w-full bg-transparent font-serif text-2xl text-ink outline-none placeholder:text-ink/75 focus-visible:outline-none md:text-3xl"
         />
         <button
           type="submit"
-          className="inline-flex shrink-0 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-brand"
+          className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-ink transition-colors hover:text-brand"
         >
           <Sparkles className="icon-pulse size-4" aria-hidden="true" />
           <span className="hidden sm:inline">Preguntar al asistente</span>
@@ -92,14 +88,14 @@ export function ServiceFinder() {
             .
           </div>
         ) : (
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink">
             <span>Por ejemplo:</span>
             {EXAMPLES.map((ex) => (
               <button
                 key={ex}
                 type="button"
                 onClick={() => setQuery(ex)}
-                className="rounded-full border border-border px-3 py-1 transition-colors hover:border-foreground hover:text-foreground"
+                className="rounded-full border border-ink/45 px-3 py-1 transition-colors hover:border-ink hover:bg-white/70"
               >
                 {ex}
               </button>

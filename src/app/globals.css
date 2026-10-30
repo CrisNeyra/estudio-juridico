@@ -30,6 +30,7 @@
   --color-brand-foreground: var(--brand-foreground);
   --color-violet: var(--violet);
   --color-violet-foreground: var(--violet-foreground);
+  --color-ink: var(--ink);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -46,6 +47,7 @@
   --radius: 0.25rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.28 0.07 264);
+  --ink: oklch(0.16 0.055 264);
   --card: oklch(0.99 0.005 264);
   --card-foreground: oklch(0.28 0.07 264);
   --popover: oklch(1 0 0);
@@ -160,7 +162,6 @@
   }
   50% {
     transform: scale(1.14);
-    opacity: 0.7;
   }
 }
 

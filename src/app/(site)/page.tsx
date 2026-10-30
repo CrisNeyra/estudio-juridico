@@ -25,9 +25,9 @@ export default function HomePage() {
           <div className="max-w-4xl rise">
             <p className="eyebrow">{site.tagline} — CABA y Provincia de Buenos Aires</p>
             <h1 className="mt-4 display text-[clamp(2rem,5.2vw,4.5rem)]">
-              Tu tranquilidad,
+              Tu tranquilidad, respaldada por la
               <br />
-              respaldada por la <em className="text-violet">mejor defensa legal.</em>
+              <em className="whitespace-nowrap text-violet">mejor defensa legal.</em>
             </h1>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -52,11 +52,14 @@ export default function HomePage() {
               <ServiceFinder />
             </div>
             <div className="max-w-sm rise [animation-delay:200ms] md:col-span-4 md:col-start-8 md:max-w-none md:pr-24 lg:pr-28">
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg font-medium text-ink">
                 Asesoramiento jurídico integral, acompañamiento profesional y defensa de{" "}
-                <strong className="font-semibold text-foreground">tus derechos</strong>.
+                <strong className="font-semibold">tus derechos</strong>.
               </p>
-              <Link href="/estudio" className="mt-6 inline-block link-underline">
+              <Link
+                href="/estudio"
+                className="mt-6 inline-block font-medium text-ink link-underline"
+              >
                 Conocé el estudio
               </Link>
             </div>
