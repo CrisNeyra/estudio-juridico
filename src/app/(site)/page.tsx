@@ -19,11 +19,13 @@ export default function HomePage() {
       <section className="relative flex min-h-[calc(100dvh-5rem)] flex-col overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
           <HeroVideo />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/25 to-white/40" />
+          <div className="absolute inset-0 bg-white/40" />
         </div>
-        <div className="container-page flex min-h-[calc(100dvh-5rem)] flex-col justify-between pt-16 pb-28 md:pt-24 md:pb-16 lg:pt-28">
+        <div className="container-page flex min-h-[calc(100dvh-5rem)] flex-col justify-between pt-28 pb-28 md:pt-40 md:pb-16 lg:pt-48">
           <div className="max-w-4xl rise">
-            <p className="eyebrow">{site.tagline} — CABA y Provincia de Buenos Aires</p>
+            <p className="eyebrow">
+              {site.tagline} {site.name} - CABA y Provincia de Buenos Aires
+            </p>
             <h1 className="mt-4 display text-[clamp(2rem,5.2vw,4.5rem)]">
               Tu tranquilidad, respaldada por la
               <br />
@@ -68,10 +70,14 @@ export default function HomePage() {
       </section>
 
       <div
-        className="section-photo"
+        className="relative section-photo"
         style={{ "--section-photo": 'url("/images/fondos/home-seccion.jpg")' } as CSSProperties}
       >
-        <section aria-labelledby="areas" className="container-page">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/50 to-transparent"
+          aria-hidden="true"
+        />
+        <section aria-labelledby="areas" className="relative container-page pt-28 md:pt-40">
           <div className="mb-10 flex items-end justify-between gap-6 md:mb-14">
             <div>
               <p className="eyebrow">Áreas de práctica</p>

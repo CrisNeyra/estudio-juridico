@@ -22,7 +22,6 @@ export const navigation = [
   { href: "/", label: "Inicio" },
   { href: "/servicios", label: "Áreas" },
   { href: "/estudio", label: "Estudio" },
-  { href: "/equipo", label: "Equipo" },
   { href: "/blog", label: "Novedades" },
   { href: "/contacto", label: "Contacto" },
 ] as const;

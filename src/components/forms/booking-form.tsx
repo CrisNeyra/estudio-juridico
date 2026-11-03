@@ -232,7 +232,7 @@ export function BookingForm({
           {e.mode ? <p className="mt-2 text-sm text-destructive">{e.mode}</p> : null}
         </fieldset>
 
-        <div className="sm:col-span-2">
+        <div className="pb-4 sm:col-span-2">
           <button
             type="button"
             disabled={!area || !date || !time}
@@ -314,7 +314,7 @@ export function BookingForm({
           </Field>
         </fieldset>
 
-        <div className="flex flex-col gap-6 pb-24 md:pb-0">
+        <div className="flex flex-col gap-6">
           <ConsentCheckbox
             error={e.consent}
             text="Acepto el tratamiento de estos datos para gestionar mi turno."

@@ -30,7 +30,7 @@ export default async function ContactPage(props: PageProps<"/contacto">) {
         lead="Contanos tu situación. Te orientamos sobre el área que corresponde y los próximos pasos."
       />
 
-      <section className="container-page grid gap-16 md:grid-cols-12">
+      <section className="container-page grid gap-16 pb-28 md:grid-cols-12 md:pb-40">
         <div className="md:col-span-7">
           <ContactForm defaultArea={defaultArea} />
         </div>

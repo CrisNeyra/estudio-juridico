@@ -32,7 +32,7 @@ export default async function BookingPage(props: PageProps<"/turnos">) {
         }
         lead="Elegí área, día y horario. Presencial en nuestra oficina o por videollamada."
       />
-      <section className="container-page grid gap-16 md:grid-cols-12">
+      <section className="container-page grid gap-16 pb-28 md:grid-cols-12 md:pb-40">
         <div className="md:col-span-8">
           <BookingForm minDate={min} maxDate={max} defaultArea={defaultArea} />
         </div>

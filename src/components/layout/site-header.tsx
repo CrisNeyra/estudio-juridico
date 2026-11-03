@@ -25,7 +25,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-lg">
       <div className="container-page flex h-16 items-center justify-between gap-6 md:h-20">
         <Link href="/" aria-label={`${site.name}, inicio`} className="min-w-0 shrink">
-          <span className="block truncate font-serif text-2xl leading-none tracking-tight md:text-3xl">
+          <span className="block truncate font-serif text-4xl leading-none tracking-tight md:text-5xl">
             {site.name}
           </span>
         </Link>

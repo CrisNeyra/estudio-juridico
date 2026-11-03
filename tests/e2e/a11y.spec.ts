@@ -6,7 +6,6 @@ const pages = [
   "/servicios",
   "/servicios/laboral",
   "/estudio",
-  "/equipo",
   "/contacto",
   "/turnos",
   "/blog",
