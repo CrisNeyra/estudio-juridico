@@ -17,7 +17,7 @@ export const metadata = pageMetadata({
 function LawyerPortrait() {
   const member = team[0];
   const image = member?.image;
-  if (!image?.startsWith("/")) return null;
+  if (!member || !image?.startsWith("/")) return null;
   const file = path.join(process.cwd(), "public", image.slice(1));
   if (!existsSync(file)) return null;
 
